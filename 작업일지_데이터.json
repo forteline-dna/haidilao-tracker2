@@ -1,8 +1,8 @@
 {
   "project": "하이디라오 영등포점 (하이디라오 한국 영등포점 프로젝트)",
   "data_source": "Lark 시공그룹 채팅 자동 수집",
-  "total_logs": 62,
-  "period": "2026-04-16 ~ 2026-06-17",
+  "total_logs": 63,
+  "period": "2026-04-16 ~ 2026-06-18",
   "logs": [
     {
       "log_date": "2026-04-16",
@@ -9661,6 +9661,62 @@
           "work_cn": "소방 배관 시공"
         }
       }
+    },
+    {
+      "log_date": "2026-06-18",
+      "upload_date": "2026-06-18",
+      "upload_time": "18:59",
+      "file_name": "하이디라오 한국 영등포점 프로젝트 시공일지-20260618.pdf",
+      "file_key": "file_v3_0012p_63fd7ff0-08d5-47d9-85b5-eae4096031ix",
+      "message_id": "om_x100b6c08579be080b206572a1a87f88",
+      "sender_id": "ou_63fb601f48a121d904517098567053af",
+      "work_categories": [
+        "검수/확인"
+      ],
+      "day_highlights": [],
+      "total_messages": 8,
+      "trades": [
+        "가설공사",
+        "먹매김·측량",
+        "가구·FF&E"
+      ],
+      "worker_count": null,
+      "trade_details": {
+        "가설공사": {
+          "color": "#94a3b8",
+          "messages": [
+            {
+              "time": "13:26",
+              "content": "办公室완료面치수5100"
+            }
+          ],
+          "count": 1
+        },
+        "먹매김·측량": {
+          "color": "#14b8a6",
+          "messages": [
+            {
+              "time": "13:26",
+              "content": "办公室완료面치수5100"
+            }
+          ],
+          "count": 1
+        },
+        "가구·FF&E": {
+          "color": "#ec4899",
+          "messages": [
+            {
+              "time": "16:35",
+              "content": "母婴室吊柜由가구(FF&E)厂制作，가구(FF&E)清单有这项@_user_1 （담당자님들查下가구(FF&E)清单）"
+            }
+          ],
+          "count": 1
+        }
+      },
+      "day_highlights_kr": [],
+      "work_categories_kr": [
+        "검수/확인"
+      ]
     }
   ],
   "trade_system": {
@@ -9710,6 +9766,6 @@
       "color": "#ec4899"
     }
   },
-  "last_enhanced": "2026-06-19 08:29:53 KST",
-  "last_updated": "2026-06-18 15:35:17 KST"
+  "last_enhanced": "2026-06-19 08:36:45 KST",
+  "last_updated": "2026-06-19 08:36:03 KST"
 }
