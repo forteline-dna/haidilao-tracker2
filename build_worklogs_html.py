@@ -597,14 +597,12 @@ function renderWeekly() {{
     weeks[wk].push(l);
   }});
 
-  const allTrades = getAllTrades();
   let html = '';
   Object.keys(weeks).sort().forEach(wkStart => {{
     const wkEnd = new Date(wkStart); wkEnd.setDate(wkEnd.getDate()+6);
     const wkEndStr = wkEnd.toISOString().slice(0,10);
     const logs = weeks[wkStart];
     const tradeTotals = {{}};
-    allTrades.forEach(t => tradeTotals[t] = 0);
     let grandTotal = 0;
 
     logs.forEach(l => {{
@@ -615,7 +613,7 @@ function renderWeekly() {{
       }});
     }});
 
-    const activeTrades = allTrades.filter(t => tradeTotals[t] > 0);
+    const activeTrades = Object.keys(tradeTotals).filter(t => tradeTotals[t] > 0).sort((a,b) => tradeTotals[b] - tradeTotals[a]);
     const maxVal = Math.max(...Object.values(tradeTotals), 1);
 
     html += `<div class="period-group">
@@ -660,12 +658,10 @@ function renderMonthly() {{
     months[mo].push(l);
   }});
 
-  const allTrades = getAllTrades();
   let html = '';
   Object.keys(months).sort().forEach(mo => {{
     const logs = months[mo];
     const tradeTotals = {{}};
-    allTrades.forEach(t => tradeTotals[t] = 0);
     let grandTotal = 0;
 
     logs.forEach(l => {{
@@ -676,18 +672,18 @@ function renderMonthly() {{
       }});
     }});
 
-    const activeTrades = allTrades.filter(t => tradeTotals[t] > 0);
+    const activeTrades = Object.keys(tradeTotals).filter(t => tradeTotals[t] > 0).sort((a,b) => tradeTotals[b] - tradeTotals[a]);
     const maxVal = Math.max(...Object.values(tradeTotals), 1);
     const [yr, mm] = mo.split('-');
     const moLabel = `${{yr}}년 ${{parseInt(mm)}}월`;
 
     // Build full table for monthly
-    const tableRows = allTrades.map(t => {{
+    const tableRows = activeTrades.map(t => {{
       const dayBreakdown = logs.map(l => {{
         const w = getWorkers(l.log_date);
         return {{ date: l.log_date, cnt: parseInt(w[t]) || 0 }};
       }}).filter(x => x.cnt > 0);
-      if (dayBreakdown.length === 0 && tradeTotals[t] === 0) return '';
+      if (dayBreakdown.length === 0 && (tradeTotals[t] || 0) === 0) return '';
       return `<tr>
         <td><div class="trade-name-cell">
           <span class="trade-dot" style="background:${{TRADE_COLORS[t]||'#6366f1'}}"></span>${{t}}
@@ -744,7 +740,10 @@ function renderMonthly() {{
 
 function getAllTrades() {{
   const s = new Set();
-  WORK_LOGS.logs.forEach(l => Object.keys(l.trade_details || {{}}).forEach(t => s.add(t)));
+  WORK_LOGS.logs.forEach(l => {{
+    Object.keys(l.trade_details || {{}}).forEach(t => s.add(t));
+    Object.keys(l.trades || {{}}).forEach(t => s.add(t));
+  }});
   return [...s].sort();
 }}
 
