@@ -1,7 +1,7 @@
 {
   "project": "하이디라오 영등포점 (하이디라오 한국 영등포점 프로젝트)",
   "data_source": "Lark 시공그룹 채팅 자동 수집",
-  "total_logs": 60,
+  "total_logs": 62,
   "period": "2026-04-16 ~ 2026-06-17",
   "logs": [
     {
@@ -29,7 +29,7 @@
         "전기공": 0,
         "현장반장": 2
       },
-      "worker_count": null,
+      "worker_count": 7,
       "trade_details": {
         "자재·발주": {
           "color": "#a855f7",
@@ -133,7 +133,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 7,
       "trade_details": {
         "가설공사": {
           "color": "#94a3b8",
@@ -261,7 +261,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 4,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -317,7 +317,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 3,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -388,7 +388,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 6,
       "trade_details": {
         "가설공사": {
           "color": "#94a3b8",
@@ -563,7 +563,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 4,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -622,7 +622,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 6,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -687,7 +687,7 @@
         "현장반장": 1,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 7,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -764,7 +764,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 7,
       "trade_details": {
         "도면·설계변경": {
           "color": "#6366f1",
@@ -844,7 +844,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 4,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -903,7 +903,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 4,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -971,7 +971,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 6,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -1092,7 +1092,7 @@
         "현장반장": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 7,
       "trade_details": {
         "도면·설계변경": {
           "color": "#6366f1",
@@ -1161,7 +1161,7 @@
         "전기공": 0,
         "보양공": 0
       },
-      "worker_count": null,
+      "worker_count": 6,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -1208,6 +1208,175 @@
       }
     },
     {
+      "log_date": "2026-04-30",
+      "upload_date": "2026-04-30",
+      "upload_time": "18:00",
+      "file_name": "2026-04-30_하이디라오 한국 영등포점 프로젝트 시공일지-20260430.pdf",
+      "pdf_file": "2026-04-30_하이디라오 한국 영등포점 프로젝트 시공일지-20260430.pdf",
+      "file_key": "",
+      "message_id": "",
+      "sender_id": "",
+      "work_categories": [
+        "가설공사",
+        "목공사/천장공사",
+        "전기공사",
+        "먹매김·측량"
+      ],
+      "work_categories_kr": [
+        "가설공사",
+        "목공사/천장공사",
+        "전기공사",
+        "먹매김·측량"
+      ],
+      "day_highlights": [
+        "현장 확인, 도면 및 지급자재 수량 정산",
+        "현장 조율/번역 자료 정리",
+        "현장 청소/현장 관리",
+        "콘크리트 가대(받침대) 설치",
+        "수량 정산, 먹매김"
+      ],
+      "day_highlights_kr": [
+        "현장 확인, 도면 및 지급자재 수량 정산",
+        "현장 조율/번역 자료 정리",
+        "현장 청소/현장 관리",
+        "콘크리트 가대(받침대) 설치",
+        "수량 정산, 먹매김"
+      ],
+      "total_messages": 53,
+      "total_workers": 9,
+      "worker_count": 9,
+      "pdf_parsed": true,
+      "locations": [
+        "룸구역",
+        "객석 구역",
+        "화장실",
+        "주방"
+      ],
+      "trades": {
+        "관리인원": 5,
+        "번역": 1,
+        "현장반장": 1,
+        "목공": 2,
+        "전기공": 0,
+        "보양공": 0
+      },
+      "trades_cn": {
+        "管理人员": 5,
+        "翻译": 1,
+        "现场班长": 1,
+        "木工": 2,
+        "电工": 0,
+        "保养工": 0
+      },
+      "work_contents": [
+        "현장 확인, 도면 및 지급자재 수량 정산",
+        "현장 조율/번역 자료 정리",
+        "현장 청소/현장 관리",
+        "콘크리트 가대(받침대) 설치",
+        "수량 정산, 먹매김"
+      ],
+      "work_contents_cn": [
+        "确认现场，图纸 / 甲供材料核算数量",
+        "现场对接/翻译资料",
+        "现场清理/现场管理",
+        "混泥土架子安装",
+        "核算数量, 放线"
+      ],
+      "trade_work_details": {
+        "관리인원": {
+          "count": 5,
+          "work": "현장 확인, 도면 및 지급자재 수량 정산",
+          "work_cn": "确认现场，图纸 / 甲供材料核算数量"
+        },
+        "번역": {
+          "count": 1,
+          "work": "현장 조율/번역 자료 정리",
+          "work_cn": "现场对接/翻译资料"
+        },
+        "현장반장": {
+          "count": 1,
+          "work": "현장 청소/현장 관리",
+          "work_cn": "现场清理/现场管理"
+        },
+        "목공": {
+          "count": 2,
+          "work": "콘크리트 가대(받침대) 설치",
+          "work_cn": "混泥土架子安装"
+        },
+        "전기공": {
+          "count": 0,
+          "work": "수량 정산, 먹매김",
+          "work_cn": "核算数量, 放线"
+        }
+      },
+      "trade_details": {
+        "철거공사": {
+          "color": "#ef4444",
+          "messages": [
+            {
+              "time": "18:27",
+              "content": "@_user_1 竣工后해체 有문제吗"
+            },
+            {
+              "time": "18:50",
+              "content": "@_user_1 준공후에도 소방서에서 점검을 나오기 때문에 철거하면 안됩니다"
+            }
+          ],
+          "count": 2
+        },
+        "급배수·위생공사": {
+          "color": "#0ea5e9",
+          "messages": [
+            {
+              "time": "16:02",
+              "content": "배관井문的位置比도면靠前，与卫生用品收纳柜产生冲突 -> 통과调整卫生用品收纳柜和문的位置解决干涉문제。"
+            }
+          ],
+          "count": 1
+        },
+        "소방·방화공사": {
+          "color": "#dc2626",
+          "messages": [
+            {
+              "time": "16:23",
+              "content": "这是涉及소방설비相关的문제。经与소방설비局확인，방화구획的방화셔터现已无法单独설치。相关法令依据如下：\n\n**相关法令**：《关于建筑物的避难及방화구조체等标准的规则》\n\n**相关条款**：第14条（방화구획的설치标准）第2款第4项A目\n\n**法令内容**：\n自动방화셔터必须满足以下各项요구：\nA. 必须在距离可用于避难的“60分钟+”방화문或60分钟방화문3米以内另行单独설치。\n\n**总结**：\n也就是说"
+            },
+            {
+              "time": "16:24",
+              "content": "根据소방설비法令，가능选择“방화문 + 방화문”或者“방화문 + 방화셔터”的组合方式，但불가单独설치방화셔터。"
+            },
+            {
+              "time": "16:29",
+              "content": "@_user_1 @_user_2 @_user_3 魏哥，严工，看一下소방설비的문제，확인一下调整方式"
+            },
+            {
+              "time": "16:29",
+              "content": "방화문만약用방화유리문가능吗"
+            },
+            {
+              "time": "16:35",
+              "content": "유리방화문가능的"
+            }
+          ],
+          "count": 11
+        },
+        "도면·설계변경": {
+          "color": "#6366f1",
+          "messages": [
+            {
+              "time": "16:02",
+              "content": "배관井문的位置比도면靠前，与卫生用品收纳柜产生冲突 -> 통과调整卫生用品收纳柜和문的位置解决干涉문제。"
+            },
+            {
+              "time": "16:23",
+              "content": "这是涉及소방설비相关的문제。经与소방설비局확인，방화구획的방화셔터现已无法单独설치。相关法令依据如下：\n\n**相关法令**：《关于建筑物的避难及방화구조체等标准的规则》\n\n**相关条款**：第14条（방화구획的설치标准）第2款第4项A目\n\n**法令内容**：\n自动방화셔터必须满足以下各项요구：\nA. 必须在距离可用于避难的“60分钟+”방화문或60分钟방화문3米以内另行单独설치。\n\n**总结**：\n也就是说"
+            }
+          ],
+          "count": 2
+        }
+      }
+    },
+    {
       "log_date": "2026-05-01",
       "upload_date": "2026-05-01",
       "upload_time": "16:58",
@@ -1243,7 +1412,7 @@
         "보양공": 0,
         "미장공": 3
       },
-      "worker_count": null,
+      "worker_count": 13,
       "trade_details": {
         "미장/타일공사": {
           "color": "#06b6d4",
@@ -1424,7 +1593,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 8,
       "trade_details": {
         "목공사/천장공사": {
           "color": "#8b5cf6",
@@ -1536,7 +1705,7 @@
         "보양공": 0,
         "미장공": 2
       },
-      "worker_count": null,
+      "worker_count": 10,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -1667,7 +1836,7 @@
         "보양공": 0,
         "미장공": 4
       },
-      "worker_count": null,
+      "worker_count": 14,
       "trade_details": {
         "철거공사": {
           "color": "#ef4444",
@@ -1855,7 +2024,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 1,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -1980,7 +2149,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 9,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -2103,7 +2272,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 8,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -2256,7 +2425,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 10,
       "trade_details": {
         "철거공사": {
           "color": "#ef4444",
@@ -2428,7 +2597,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 9,
       "trade_details": {
         "철거공사": {
           "color": "#ef4444",
@@ -2538,7 +2707,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 9,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -2626,7 +2795,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 12,
       "trade_details": {
         "조적공사": {
           "color": "#f97316",
@@ -2756,7 +2925,7 @@
         "보양공": 0,
         "미장공": 0
       },
-      "worker_count": null,
+      "worker_count": 11,
       "trade_details": {
         "도면·설계변경": {
           "color": "#6366f1",
@@ -2885,7 +3054,7 @@
         "미장공": 0,
         "풍관(신풍·배풍)": 9
       },
-      "worker_count": null,
+      "worker_count": 21,
       "trade_details": {
         "급배수·위생공사": {
           "color": "#0ea5e9",
@@ -3052,7 +3221,7 @@
         "미장공": 0,
         "풍관(신풍·배풍)": 8
       },
-      "worker_count": null,
+      "worker_count": 16,
       "trade_details": {
         "조적공사": {
           "color": "#f97316",
@@ -3241,7 +3410,7 @@
         "풍관(신풍·배풍)": 8,
         "조적공": 4
       },
-      "worker_count": null,
+      "worker_count": 24,
       "trade_details": {
         "전기공사": {
           "color": "#eab308",
@@ -3370,7 +3539,7 @@
         "조적공": 2,
         "단열공": 1
       },
-      "worker_count": null,
+      "worker_count": 23,
       "trade_details": {
         "조적공사": {
           "color": "#f97316",
@@ -3619,7 +3788,7 @@
         "조적공": 8,
         "단열공": 0
       },
-      "worker_count": null,
+      "worker_count": 14,
       "trade_details": {
         "철거공사": {
           "color": "#ef4444",
@@ -3749,7 +3918,7 @@
         "조적공": 1,
         "단열공": 0
       },
-      "worker_count": null,
+      "worker_count": 22,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -3905,7 +4074,7 @@
         "조적공": 3,
         "단열공": 0
       },
-      "worker_count": null,
+      "worker_count": 26,
       "trade_details": {
         "급배수·위생공사": {
           "color": "#0ea5e9",
@@ -4135,7 +4304,7 @@
         "조적공": 0,
         "단열공": 0
       },
-      "worker_count": null,
+      "worker_count": 26,
       "trade_details": {
         "조적공사": {
           "color": "#f97316",
@@ -4348,7 +4517,7 @@
         "단열공": 0,
         "방수공": 2
       },
-      "worker_count": null,
+      "worker_count": 32,
       "trade_details": {
         "급배수·위생공사": {
           "color": "#0ea5e9",
@@ -4536,7 +4705,7 @@
         "수도공": 2,
         "비계공": 0
       },
-      "worker_count": null,
+      "worker_count": 42,
       "trade_details": {},
       "day_highlights_kr": [
         "[13:38] @_user_1 우리측按照관리사무소 요구진행소음 공사是没有문제的，让건물주 협의확인吧",
@@ -4659,7 +4828,7 @@
         "비계공": 0,
         "경량철골공": 2
       },
-      "worker_count": null,
+      "worker_count": 31,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -4783,7 +4952,7 @@
         "비계공": 0,
         "경량철골공": 2
       },
-      "worker_count": null,
+      "worker_count": 17,
       "trade_details": {
         "HVAC·기계설비공사": {
           "color": "#22c55e",
@@ -4895,7 +5064,7 @@
         "비계공": 0,
         "경량철골공": 0
       },
-      "worker_count": null,
+      "worker_count": 30,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -5016,7 +5185,7 @@
         "경량철골공": 0,
         "철거공": 3
       },
-      "worker_count": null,
+      "worker_count": 26,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -5209,7 +5378,7 @@
         "경량철골공": 2,
         "철거공": 3
       },
-      "worker_count": null,
+      "worker_count": 31,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -5425,7 +5594,7 @@
         "경량철골공": 0,
         "철거공": 0
       },
-      "worker_count": null,
+      "worker_count": 26,
       "trade_details": {
         "급배수·위생공사": {
           "color": "#0ea5e9",
@@ -5564,7 +5733,7 @@
         "경량철골공": 0,
         "철거공": 0
       },
-      "worker_count": null,
+      "worker_count": 30,
       "trade_details": {
         "목공사/천장공사": {
           "color": "#8b5cf6",
@@ -5770,7 +5939,7 @@
         "철거공": 0,
         "소방공": 2
       },
-      "worker_count": null,
+      "worker_count": 21,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -5932,7 +6101,7 @@
         "철거공": 0,
         "냉난방공조공": 4
       },
-      "worker_count": null,
+      "worker_count": 23,
       "trade_details": {},
       "day_highlights_kr": [
         "[11:33] @_user_1 실장님 확인부탁드려요 감사합니다♡"
@@ -6087,7 +6256,7 @@
         "철거공": 0,
         "냉난방공조공": 4
       },
-      "worker_count": null,
+      "worker_count": 31,
       "trade_details": {
         "소방·방화공사": {
           "color": "#dc2626",
@@ -6272,6 +6441,237 @@
       }
     },
     {
+      "log_date": "2026-06-03",
+      "upload_date": "2026-06-03",
+      "upload_time": "18:00",
+      "file_name": "2026-06-03_하이디라오 한국 영등포점 프로젝트 시공일지-20260603.pdf",
+      "pdf_file": "2026-06-03_하이디라오 한국 영등포점 프로젝트 시공일지-20260603.pdf",
+      "file_key": "",
+      "message_id": "",
+      "sender_id": "",
+      "work_categories": [
+        "가설공사",
+        "목공사/천장공사",
+        "전기공사",
+        "금속공사",
+        "급배수·위생공사",
+        "소방·방화공사",
+        "미장/타일공사",
+        "HVAC·기계설비공사",
+        "방수공사",
+        "철거공사",
+        "먹매김·측량"
+      ],
+      "work_categories_kr": [
+        "가설공사",
+        "목공사/천장공사",
+        "전기공사",
+        "금속공사",
+        "급배수·위생공사",
+        "소방·방화공사",
+        "미장/타일공사",
+        "HVAC·기계설비공사",
+        "방수공사",
+        "철거공사",
+        "먹매김·측량"
+      ],
+      "day_highlights": [
+        "현장 실사, 도면 및 지급자재 수량 정산",
+        "현장 조율 / 번역 자료 정리",
+        "현장 청소 / 건축폐기물 반출",
+        "라이트박스 먹줄놓기(먹매김) 작업",
+        "벽체 경량철골 천정틀/스터드 설치",
+        "자재 수직 양중 및 행거(설치) 작업",
+        "주방 / 화장실 우레탄 방수 시공",
+        "배기 및 급기(환기) 덕트 배관 설치",
+        "케이블 트레이 행거 설치",
+        "아연도금 각파이프 설치"
+      ],
+      "day_highlights_kr": [
+        "현장 실사, 도면 및 지급자재 수량 정산",
+        "현장 조율 / 번역 자료 정리",
+        "현장 청소 / 건축폐기물 반출",
+        "라이트박스 먹줄놓기(먹매김) 작업",
+        "벽체 경량철골 천정틀/스터드 설치",
+        "자재 수직 양중 및 행거(설치) 작업",
+        "주방 / 화장실 우레탄 방수 시공",
+        "배기 및 급기(환기) 덕트 배관 설치",
+        "케이블 트레이 행거 설치",
+        "아연도금 각파이프 설치"
+      ],
+      "total_messages": 47,
+      "total_workers": 31,
+      "worker_count": 31,
+      "pdf_parsed": true,
+      "locations": [
+        "객석",
+        "주방",
+        "화장실"
+      ],
+      "trades": {
+        "관리인원": 6,
+        "번역": 2,
+        "현장반장": 2,
+        "금속공": 4,
+        "목공": 2,
+        "전기공": 2,
+        "배관공(수도공)": 4,
+        "경량철골공": 2,
+        "냉난방공조공": 4,
+        "잡부": 3
+      },
+      "trades_cn": {
+        "管理人员": 6,
+        "翻译": 2,
+        "现场班长": 2,
+        "金属工": 4,
+        "木工": 2,
+        "电工": 2,
+        "水工": 4,
+        "轻钢工": 2,
+        "暖通空调工": 4,
+        "拆除工": 3
+      },
+      "work_contents": [
+        "현장 실사, 도면 및 지급자재 수량 정산",
+        "현장 조율 / 번역 자료 정리",
+        "현장 청소 / 건축폐기물 반출",
+        "라이트박스 먹줄놓기(먹매김) 작업",
+        "벽체 경량철골 천정틀/스터드 설치",
+        "자재 수직 양중 및 행거(설치) 작업",
+        "주방 / 화장실 우레탄 방수 시공",
+        "배기 및 급기(환기) 덕트 배관 설치",
+        "케이블 트레이 행거 설치",
+        "아연도금 각파이프 설치"
+      ],
+      "work_contents_cn": [
+        "现场勘查, 图纸及甲供材料数量核算",
+        "现场协调 / 翻译资料整理",
+        "现场清理 / 建筑垃圾清运",
+        "灯箱墨线弹线作业",
+        "墙体轻钢龙骨安装",
+        "材料垂直运输 / 吊架安装作业",
+        "厨房 / 卫生间聚氨酯防水施工",
+        "排风 / 新风管道安装",
+        "电缆桥架吊架安装",
+        "镀锌方钢管安装"
+      ],
+      "trade_work_details": {
+        "관리인원": {
+          "count": 6,
+          "work": "현장 실사, 도면 및 지급자재 수량 정산",
+          "work_cn": "现场勘查, 图纸及甲供材料数量核算"
+        },
+        "번역": {
+          "count": 2,
+          "work": "현장 조율 / 번역 자료 정리",
+          "work_cn": "现场协调 / 翻译资料整理"
+        },
+        "현장반장": {
+          "count": 2,
+          "work": "현장 청소 / 건축폐기물 반출",
+          "work_cn": "现场清理 / 建筑垃圾清运"
+        },
+        "금속공": {
+          "count": 4,
+          "work": "아연도금 각파이프 설치, 자재 수직 양중 및 행거(설치) 작업",
+          "work_cn": "镀锌方钢管安装, 材料垂直运输 / 吊架安装作业"
+        },
+        "목공": {
+          "count": 2,
+          "work": "라이트박스 먹줄놓기(먹매김) 작업",
+          "work_cn": "灯箱墨线弹线作业"
+        },
+        "전기공": {
+          "count": 2,
+          "work": "케이블 트레이 행거 설치",
+          "work_cn": "电缆桥架吊架安装"
+        },
+        "배관공(수도공)": {
+          "count": 4,
+          "work": "주방 / 화장실 우레탄 방수 시공",
+          "work_cn": "厨房 / 卫生间聚氨酯防水施工"
+        },
+        "경량철골공": {
+          "count": 2,
+          "work": "벽체 경량철골 천정틀/스터드 설치",
+          "work_cn": "墙体轻钢龙骨安装"
+        },
+        "냉난방공조공": {
+          "count": 4,
+          "work": "배기 및 급기(환기) 덕트 배관 설치",
+          "work_cn": "排风 / 新风管道安装"
+        },
+        "잡부": {
+          "count": 3,
+          "work": "현장 청소 / 건축폐기물 반출",
+          "work_cn": "现场清理 / 建筑垃圾清运"
+        }
+      },
+      "trade_details": {
+        "철거공사": {
+          "color": "#ef4444",
+          "messages": [
+            {
+              "time": "13:03",
+              "content": "전기설비安全점검来的时候不许有문的，会让우리측철거的"
+            }
+          ],
+          "count": 1
+        },
+        "소방·방화공사": {
+          "color": "#dc2626",
+          "messages": [
+            {
+              "time": "13:08",
+              "content": "@_user_1 你说的是소방설비的吗？几个분전반"
+            },
+            {
+              "time": "13:09",
+              "content": "跟소방설비没有문제，是전기설비安全的문제"
+            }
+          ],
+          "count": 2
+        },
+        "전기공사": {
+          "color": "#eab308",
+          "messages": [
+            {
+              "time": "10:29",
+              "content": "<p>按전기설비요구분전반불가有暗문，只能贴纸，요청확인@_user_1@_user_2</p>"
+            },
+            {
+              "time": "13:03",
+              "content": "전기설비安全점검来的时候不许有문的，会让우리측철거的"
+            },
+            {
+              "time": "13:06",
+              "content": "@_user_1 @_user_2 이墙上内嵌분전반还是按照当地요구来吧？이事情之前的店遇到过"
+            },
+            {
+              "time": "13:08",
+              "content": "@_user_1 你说的是소방설비的吗？几个분전반"
+            },
+            {
+              "time": "13:09",
+              "content": "跟소방설비没有문제，是전기설비安全的문제"
+            }
+          ],
+          "count": 11
+        },
+        "도면·설계변경": {
+          "color": "#6366f1",
+          "messages": [
+            {
+              "time": "13:27",
+              "content": "@_user_1 你告诉원청(종합건설)어떻게做，实在不行把别的店的照片拍给그쪽，또한你看一下도면，도면上是不是画的暗装"
+            }
+          ],
+          "count": 1
+        }
+      }
+    },
+    {
       "log_date": "2026-06-04",
       "upload_date": "2026-06-04",
       "upload_time": "19:07",
@@ -6318,7 +6718,7 @@
         "냉난방공조공": 6,
         "소방공": 0
       },
-      "worker_count": null,
+      "worker_count": 49,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -6581,7 +6981,7 @@
         "냉난방공조공": 2,
         "소방공": 2
       },
-      "worker_count": null,
+      "worker_count": 35,
       "trade_details": {
         "전기공사": {
           "color": "#eab308",
@@ -6856,7 +7256,7 @@
         "냉난방공조공": 4,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 40,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -7156,7 +7556,7 @@
         "냉난방공조공": 0,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 30,
       "trade_details": {
         "가설공사": {
           "color": "#94a3b8",
@@ -7409,7 +7809,7 @@
         "냉난방공조공": 0,
         "소방공": 5
       },
-      "worker_count": null,
+      "worker_count": 37,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -7602,7 +8002,7 @@
         "냉난방공조공": 6,
         "소방공": 5
       },
-      "worker_count": null,
+      "worker_count": 44,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -7884,7 +8284,7 @@
         "냉난방공조공": 9,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 45,
       "trade_details": {
         "가설공사": {
           "color": "#94a3b8",
@@ -8161,7 +8561,7 @@
         "냉난방공조공": 11,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 55,
       "trade_details": {
         "급배수·위생공사": {
           "color": "#0ea5e9",
@@ -8404,7 +8804,7 @@
         "냉난방공조공": 10,
         "소방공": 0
       },
-      "worker_count": null,
+      "worker_count": 51,
       "trade_details": {
         "전기공사": {
           "color": "#eab308",
@@ -8597,7 +8997,7 @@
         "냉난방공조공": 12,
         "소방공": 0
       },
-      "worker_count": null,
+      "worker_count": 40,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -8722,7 +9122,7 @@
         "냉난방공조공": 0,
         "소방공": 0
       },
-      "worker_count": null,
+      "worker_count": 19,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -8844,7 +9244,7 @@
         "냉난방공조공": 11,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 46,
       "trade_details": {
         "방수공사": {
           "color": "#3b82f6",
@@ -8996,7 +9396,7 @@
         "냉난방공조공": 14,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 56,
       "trade_details": {},
       "day_highlights_kr": [],
       "work_categories_kr": [],
@@ -9138,7 +9538,7 @@
         "냉난방공조공": 12,
         "소방공": 4
       },
-      "worker_count": null,
+      "worker_count": 60,
       "trade_details": {
         "HVAC·기계설비공사": {
           "color": "#22c55e",
@@ -9310,6 +9710,6 @@
       "color": "#ec4899"
     }
   },
-  "last_enhanced": "2026-06-18 13:52:34 KST",
+  "last_enhanced": "2026-06-19 08:29:53 KST",
   "last_updated": "2026-06-18 15:35:17 KST"
 }
