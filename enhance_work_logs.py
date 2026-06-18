@@ -430,11 +430,21 @@ def main():
 
         # 3-1. 공종별 분류 (건축 표준)
         existing_trades = log.get('trades')
-        if log.get('pdf_parsed') or (isinstance(existing_trades, dict) and existing_trades):
-            trades = list(existing_trades.keys()) if isinstance(existing_trades, dict) else existing_trades
+
+        # trades는 항상 dict {공종명: 인원수} 형태를 유지
+        if isinstance(existing_trades, dict) and existing_trades:
+            # 이미 정상 dict → 유지
+            trades_dict = existing_trades
+        elif isinstance(existing_trades, list) and existing_trades:
+            # 리스트 → dict 변환 (인원수 0)
+            trades_dict = {t: 0 for t in existing_trades if isinstance(t, str)}
         else:
-            trades = classify_by_trade(all_text)
-            log['trades'] = trades
+            # 신규: 채팅에서 공종 분류
+            trade_names = classify_by_trade(all_text)
+            trades_dict = {t: 0 for t in trade_names}
+
+        log['trades'] = trades_dict
+        trades = list(trades_dict.keys())
 
         # 3-2. 작업인원수 추출
         if log.get('pdf_parsed') and log.get('total_workers'):

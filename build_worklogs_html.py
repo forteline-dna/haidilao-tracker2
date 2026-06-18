@@ -470,7 +470,7 @@ function getWorkers(logDate) {{
   if (wd[logDate] && Object.keys(wd[logDate]).length > 0) return wd[logDate];
   // fallback: JSON 데이터의 trades 필드에서 공종별 인원 가져오기
   const log = WORK_LOGS.logs.find(l => l.log_date === logDate);
-  if (log && log.trades && typeof log.trades === 'object') {{
+  if (log && log.trades && typeof log.trades === 'object' && !Array.isArray(log.trades)) {{
     return log.trades;
   }}
   return {{}};
@@ -742,7 +742,9 @@ function getAllTrades() {{
   const s = new Set();
   WORK_LOGS.logs.forEach(l => {{
     Object.keys(l.trade_details || {{}}).forEach(t => s.add(t));
-    Object.keys(l.trades || {{}}).forEach(t => s.add(t));
+    if (l.trades && typeof l.trades === 'object' && !Array.isArray(l.trades)) {{
+      Object.keys(l.trades).forEach(t => s.add(t));
+    }}
   }});
   return [...s].sort();
 }}

@@ -9675,11 +9675,11 @@
       ],
       "day_highlights": [],
       "total_messages": 8,
-      "trades": [
-        "가설공사",
-        "먹매김·측량",
-        "가구·FF&E"
-      ],
+      "trades": {
+        "가설공사": 0,
+        "먹매김·측량": 0,
+        "가구·FF&E": 0
+      },
       "worker_count": null,
       "trade_details": {
         "가설공사": {
@@ -9766,6 +9766,6 @@
       "color": "#ec4899"
     }
   },
-  "last_enhanced": "2026-06-19 08:36:45 KST",
+  "last_enhanced": "2026-06-19 08:56:32 KST",
   "last_updated": "2026-06-19 08:36:03 KST"
 }
