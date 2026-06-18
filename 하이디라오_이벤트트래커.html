@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하이디라오 영등포점 — 공사 이벤트 트래커</title>
+<meta name="description" content="하이디라오 영등포점 인테리어 공사 이벤트 추적 대시보드 — 수평 타임라인">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-card: #1a2236;
+  --bg-hover: #232e47;
+  --bg-timeline: #0d1220;
+  --border: #1e293b;
+  --border-light: #2a3a55;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59,130,246,0.25);
+  --cat-confirmed: #22c55e;
+  --cat-change: #f59e0b;
+  --cat-issue: #ef4444;
+  --cat-cost: #a855f7;
+  --cat-meeting: #3b82f6;
+  --cat-drawing: #06b6d4;
+  --cat-schedule: #ec4899;
+  --cat-chat: #6b7280;
+  --radius: 8px;
+  --radius-sm: 5px;
+  --shadow: 0 4px 20px rgba(0,0,0,0.4);
+  --font: 'Inter', 'Noto Sans KR', -apple-system, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ===== TOP FIXED AREA ===== */
+.top-fixed {
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  z-index: 100;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.header-logo { font-size: 22px; }
+.header-title {
+  font-size: 16px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.header-sub { font-size: 11px; color: var(--text-muted); margin-left: 4px; }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: var(--bg-card);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.stat-chip .val { color: var(--text-primary); font-weight: 700; }
+.progress-wrap {
+  width: 100px;
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+.progress-text { font-size: 10px; color: var(--text-muted); }
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  flex-wrap: wrap;
+}
+.search-box {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  gap: 6px;
+  flex: 0 0 200px;
+}
+.search-box input {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+  width: 100%;
+  font-family: var(--font);
+}
+.search-box input::placeholder { color: var(--text-muted); }
+.pills { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.pill {
+  padding: 3px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  user-select: none;
+}
+.pill:hover { border-color: var(--text-muted); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.pill[data-cat="confirmed"].active { background: var(--cat-confirmed); border-color: var(--cat-confirmed); }
+.pill[data-cat="change"].active { background: var(--cat-change); border-color: var(--cat-change); color: #000; }
+.pill[data-cat="issue"].active { background: var(--cat-issue); border-color: var(--cat-issue); }
+.pill[data-cat="cost"].active { background: var(--cat-cost); border-color: var(--cat-cost); }
+.pill[data-cat="meeting"].active { background: var(--cat-meeting); border-color: var(--cat-meeting); }
+.pill[data-cat="drawing"].active { background: var(--cat-drawing); border-color: var(--cat-drawing); }
+.pill[data-cat="schedule"].active { background: var(--cat-schedule); border-color: var(--cat-schedule); }
+.pill[data-cat="chat"].active { background: var(--cat-chat); border-color: var(--cat-chat); }
+.toolbar-btns { display: flex; gap: 4px; margin-left: auto; }
+.tbtn {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+.tbtn:hover { border-color: var(--accent); color: var(--text-primary); }
+.tbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ===== CHECKED BAR ===== */
+.checked-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 20px;
+  background: rgba(59,130,246,0.06);
+  border-bottom: 1px solid var(--border);
+  min-height: 36px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+.checked-bar-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.checked-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.checked-chip:hover { border-color: var(--accent); color: var(--text-primary); }
+.checked-chip .cc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.checked-chip .cc-remove {
+  font-size: 10px;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 2px;
+}
+.checked-chip .cc-remove:hover { color: var(--cat-issue); }
+.checked-empty { font-size: 11px; color: var(--text-muted); font-style: italic; }
+
+/* ===== HORIZONTAL TIMELINE ===== */
+.timeline-section {
+  flex: 1;
+  min-height: 560px;
+  max-height: 70vh;
+  position: relative;
+  background: var(--bg-timeline);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+.zoom-controls {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+.zoom-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+.zoom-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.zoom-info {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+.tl-scroll {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: auto;
+  cursor: grab;
+  position: relative;
+}
+.tl-scroll.dragging { cursor: grabbing; }
+.tl-canvas {
+  position: relative;
+  min-height: 100%;
+}
+
+/* Month row */
+.tl-month-row {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 22px;
+  background: rgba(10,14,26,0.95);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+.tl-month {
+  position: absolute;
+  top: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  padding-left: 8px;
+  border-left: 2px solid var(--accent);
+}
+
+/* Day row */
+.tl-day-row {
+  position: sticky;
+  top: 22px;
+  z-index: 5;
+  height: 22px;
+  background: rgba(10,14,26,0.9);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--border);
+}
+.tl-day {
+  position: absolute;
+  top: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transform: translateX(-50%);
+  cursor: pointer;
+}
+.tl-day:hover { color: var(--text-primary); }
+.tl-day.has-events { color: var(--text-primary); }
+.tl-day.weekend { color: var(--cat-issue); opacity: 0.6; }
+
+/* Vertical lines + events area */
+.tl-body {
+  position: relative;
+  flex: 1;
+  min-height: 120px;
+}
+.tl-vline {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+  opacity: 0.4;
+}
+.tl-vline.has-events {
+  background: var(--border-light);
+  opacity: 0.8;
+}
+.tl-month-divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--accent);
+  opacity: 0.3;
+}
+
+/* Event strips (vertical text) */
+.tl-strip {
+  position: absolute;
+  top: 6px;
+  width: 24px;
+  min-height: 60px;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 6px 3px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-primary);
+  border-radius: 0 0 4px 4px;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.15s;
+  border-top: 9px solid var(--cat-color, var(--accent));
+  background: linear-gradient(180deg, rgba(var(--cat-rgb, 59,130,246), 0.2) 0%, rgba(var(--cat-rgb, 59,130,246), 0.05) 100%);
+}
+.tl-strip:hover {
+  transform: scaleX(1.2);
+  z-index: 5;
+  box-shadow: 0 0 12px rgba(var(--cat-rgb, 59,130,246), 0.4);
+}
+.tl-strip.selected {
+  transform: scaleX(1.3);
+  z-index: 6;
+  box-shadow: 0 0 16px rgba(var(--cat-rgb, 59,130,246), 0.6);
+  border-top-width: 12px;
+}
+.tl-strip[data-cat="confirmed"] { --cat-color: var(--cat-confirmed); --cat-rgb: 34,197,94; }
+.tl-strip[data-cat="change"]    { --cat-color: var(--cat-change); --cat-rgb: 245,158,11; }
+.tl-strip[data-cat="issue"]     { --cat-color: var(--cat-issue); --cat-rgb: 239,68,68; }
+.tl-strip[data-cat="cost"]      { --cat-color: var(--cat-cost); --cat-rgb: 168,85,247; }
+.tl-strip[data-cat="meeting"]   { --cat-color: var(--cat-meeting); --cat-rgb: 59,130,246; }
+.tl-strip[data-cat="drawing"]   { --cat-color: var(--cat-drawing); --cat-rgb: 6,182,212; }
+.tl-strip[data-cat="schedule"]  { --cat-color: var(--cat-schedule); --cat-rgb: 236,72,153; }
+.tl-strip[data-cat="chat"]      { --cat-color: var(--cat-chat); --cat-rgb: 107,114,128; }
+
+.tl-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+  line-height: 1.8;
+}
+
+/* ===== BOTTOM PANEL ===== */
+.bottom-panel {
+  flex: 1;
+  min-height: 200px;
+  display: flex;
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+}
+
+/* Event List (left) */
+.event-list-wrap {
+  width: 760px;
+  min-width: 600px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.list-header {
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.list-header-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+.list-header-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 1px 7px;
+  border-radius: 8px;
+}
+.list-actions { margin-left: auto; display: flex; gap: 4px; }
+.list-action-btn {
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+.list-action-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+.event-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.evt-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.1s;
+  border-bottom: 1px solid rgba(30,41,59,0.5);
+}
+.evt-item:hover { background: var(--bg-hover); }
+.evt-item.selected { background: var(--bg-card); border-left: 3px solid var(--accent); }
+.evt-check {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-light);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+  transition: all 0.15s;
+  background: transparent;
+}
+.evt-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.evt-check:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -1px;
+  left: 1px;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+}
+.evt-check:hover { border-color: var(--accent); }
+.evt-cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+.evt-cat-dot[data-cat="confirmed"] { background: var(--cat-confirmed); }
+.evt-cat-dot[data-cat="change"]    { background: var(--cat-change); }
+.evt-cat-dot[data-cat="issue"]     { background: var(--cat-issue); }
+.evt-cat-dot[data-cat="cost"]      { background: var(--cat-cost); }
+.evt-cat-dot[data-cat="meeting"]   { background: var(--cat-meeting); }
+.evt-cat-dot[data-cat="drawing"]   { background: var(--cat-drawing); }
+.evt-cat-dot[data-cat="schedule"]  { background: var(--cat-schedule); }
+.evt-cat-dot[data-cat="chat"]      { background: var(--cat-chat); }
+.evt-info { flex: 1; min-width: 0; }
+.evt-date { font-size: 10px; color: var(--text-muted); }
+.evt-title-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.no-results-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Detail Panel (right) */
+.detail-panel {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg-primary);
+  padding: 0;
+}
+.detail-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-muted);
+  gap: 8px;
+}
+.detail-empty .icon { font-size: 36px; }
+.detail-empty p { font-size: 13px; }
+.detail-content { display: none; }
+.detail-header {
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.detail-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.detail-cat[data-cat="confirmed"] { background: rgba(34,197,94,0.15); color: var(--cat-confirmed); }
+.detail-cat[data-cat="change"]    { background: rgba(245,158,11,0.15); color: var(--cat-change); }
+.detail-cat[data-cat="issue"]     { background: rgba(239,68,68,0.15); color: var(--cat-issue); }
+.detail-cat[data-cat="cost"]      { background: rgba(168,85,247,0.15); color: var(--cat-cost); }
+.detail-cat[data-cat="meeting"]   { background: rgba(59,130,246,0.15); color: var(--cat-meeting); }
+.detail-cat[data-cat="drawing"]   { background: rgba(6,182,212,0.15); color: var(--cat-drawing); }
+.detail-cat[data-cat="schedule"]  { background: rgba(236,72,153,0.15); color: var(--cat-schedule); }
+.detail-cat[data-cat="chat"]      { background: rgba(107,114,128,0.15); color: var(--cat-chat); }
+
+/* Chat section collapsible */
+.chat-section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: rgba(107,114,128,0.08);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+.chat-section-toggle:hover { background: rgba(107,114,128,0.15); }
+.chat-section-toggle .toggle-icon {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.2s;
+}
+.chat-section-toggle .toggle-icon.open { transform: rotate(90deg); }
+.chat-section-toggle .toggle-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cat-chat);
+}
+.chat-section-toggle .toggle-count {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  padding: 1px 7px;
+  border-radius: 8px;
+}
+.chat-section-body { display: none; }
+.chat-section-body.open { display: block; }
+.detail-title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.detail-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.detail-body { padding: 16px 20px; }
+.detail-section { margin-bottom: 16px; }
+.detail-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.detail-text {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.detail-decisions {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.detail-decisions li {
+  font-size: 12px;
+  padding: 6px 10px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--text-muted);
+  color: var(--text-secondary);
+}
+.detail-decisions li.confirmed { border-color: var(--cat-confirmed); }
+.detail-decisions li.change    { border-color: var(--cat-change); }
+.detail-decisions li.issue     { border-color: var(--cat-issue); }
+.detail-decisions li.cost      { border-color: var(--cat-cost); }
+.linked-events { display: flex; flex-direction: column; gap: 3px; }
+.linked-event-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.linked-event-card:hover { background: var(--bg-hover); color: var(--text-primary); }
+.linked-event-card .le-date { color: var(--text-muted); font-weight: 600; width: 35px; }
+.linked-event-card .le-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: auto; }
+.modal-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  width: 460px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow);
+}
+.modal-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header-bar .title { font-size: 15px; font-weight: 700; }
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+.modal-body { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--accent);
+}
+.form-group textarea { min-height: 80px; resize: vertical; }
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px;
+  border-top: 1px solid var(--border);
+}
+.modal-btn {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font);
+}
+.modal-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  z-index: 2000;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ===== RESIZE HANDLE ===== */
+.resize-handle {
+  height: 5px;
+  background: var(--border);
+  cursor: ns-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.resize-handle:hover { background: var(--accent); }
+
+/* ===== MILESTONE & EMPTY STATE ===== */
+.tl-milestone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.tl-milestone-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  border-left: 2px dashed #f43f5e;
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.4);
+  opacity: 0.8;
+}
+.tl-milestone-label {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  transform: translateX(-50%);
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid #f43f5e;
+  color: #ffe4e6;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 5;
+}
+.tl-body-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+  pointer-events: none;
+  line-height: 1.6;
+  z-index: 1;
+  background: rgba(10, 14, 26, 0.6);
+  padding: 8px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(2px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .event-list-wrap { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); }
+  .bottom-panel { flex-direction: column; }
+  .header-right { display: none; }
+  .toolbar { padding: 6px 12px; }
+  .search-box { flex: 1; }
+  .pills { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP FIXED AREA ===== -->
+<div class="top-fixed">
+  <!-- Header -->
+  <div class="header">
+    <span class="header-logo">🏗️</span>
+    <div>
+      <div class="header-title">하이디라오 영등포점</div>
+      <div class="header-sub">공사 이벤트 트래커 — 수평 타임라인</div>
+    </div>
+    <div class="header-right">
+      <div class="stat-chip">📊 전체 <span class="val" id="totalEvents">0</span></div>
+      <div class="stat-chip">🔄 변경 <span class="val" id="totalChanges">0</span></div>
+      <div class="stat-chip">⚠️ 이슈 <span class="val" id="totalIssues">0</span></div>
+      <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-text" id="progressText">공정 0%</span>
+    </div>
+  </div>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <span>🔍</span>
+      <input type="text" id="searchInput" placeholder="이벤트 검색...">
+    </div>
+    <div class="pills">
+      <span class="pill" data-cat="all">전체</span>
+      <span class="pill active" data-cat="confirmed">🟢 확정</span>
+      <span class="pill active" data-cat="change">🟡 변경</span>
+      <span class="pill active" data-cat="issue">🔴 문제</span>
+      <span class="pill active" data-cat="cost">💰 공사비</span>
+      <span class="pill active" data-cat="meeting">📋 회의</span>
+      <span class="pill active" data-cat="drawing">📐 도면</span>
+      <span class="pill active" data-cat="schedule">📅 일정</span>
+      <span class="pill" data-cat="chat">💬 라크</span>
+    </div>
+    <div class="toolbar-btns">
+      <button class="tbtn" id="btnSave">💾 저장</button>
+      <button class="tbtn" id="btnExport">📤 JSON</button>
+      <button class="tbtn" id="btnExportExcel">📊 엑셀</button>
+      <button class="tbtn primary" id="btnAdd">+ 추가</button>
+    </div>
+  </div>
+  <!-- Checked Events Bar -->
+  <div class="checked-bar" id="checkedBar">
+    <span class="checked-bar-label">☑ 체크됨:</span>
+    <span class="checked-empty" id="checkedEmpty">이벤트를 체크하면 여기에 표시됩니다</span>
+  </div>
+</div>
+
+<!-- ===== HORIZONTAL TIMELINE ===== -->
+<div class="timeline-section" id="timelineSection">
+  <div class="zoom-controls">
+    <button class="zoom-btn" id="zoomOut" title="축소">−</button>
+    <span class="zoom-info" id="zoomInfo">100%</span>
+    <button class="zoom-btn" id="zoomIn" title="확대">+</button>
+    <button class="zoom-btn" id="zoomFit" title="전체보기">⊞</button>
+  </div>
+  <div class="tl-scroll" id="tlScroll">
+    <div class="tl-canvas" id="tlCanvas">
+      <div class="tl-empty" id="tlEmpty">✨ 아래 이벤트 목록에서 체크(☑)하면<br>수평 타임라인에 표시됩니다</div>
+    </div>
+  </div>
+</div>
+
+<!-- Resize Handle -->
+<div class="resize-handle" id="resizeHandle"></div>
+
+<!-- ===== BOTTOM PANEL ===== -->
+<div class="bottom-panel" id="bottomPanel">
+  <!-- Event List (left) -->
+  <div class="event-list-wrap">
+    <div class="list-header">
+      <span class="list-header-title">📋 이벤트 목록</span>
+      <span class="list-header-count" id="listCount">0</span>
+      <div class="list-actions">
+        <button class="list-action-btn" id="btnCheckAll">전체 선택</button>
+        <button class="list-action-btn" id="btnUncheckAll">전체 해제</button>
+      </div>
+    </div>
+    <div class="event-list" id="eventList"></div>
+  </div>
+  <!-- Detail Panel (right) -->
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-empty" id="detailEmpty">
+      <span class="icon">📄</span>
+      <p>이벤트를 클릭하면 상세 내용이 표시됩니다</p>
+    </div>
+    <div class="detail-content" id="detailContent"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-header-bar">
+      <span class="title" id="modalTitle">새 이벤트 추가</span>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>날짜 *</label><input type="date" id="formDate"></div>
+      <div class="form-group"><label>카테고리 *</label>
+        <select id="formCategory">
+          <option value="confirmed">🟢 확정</option>
+          <option value="change">🟡 변경</option>
+          <option value="issue">🔴 문제</option>
+          <option value="cost">💰 공사비</option>
+          <option value="meeting">📋 회의</option>
+          <option value="drawing">📐 도면변경</option>
+          <option value="schedule">📅 일정</option>
+          <option value="chat">💬 라크대화</option>
+        </select>
+      </div>
+      <div class="form-group"><label>제목 *</label><input type="text" id="formTitle" placeholder="이벤트 제목"></div>
+      <div class="form-group"><label>요약</label><input type="text" id="formSummary" placeholder="간단한 요약"></div>
+      <div class="form-group"><label>상세 내용</label><textarea id="formDetails" placeholder="상세 설명"></textarea></div>
+      <div class="form-group"><label>출처</label><input type="text" id="formSource" placeholder="문서명, 회의록 등"></div>
+      <div class="form-group"><label>연결 이벤트 (콤마 구분)</label><input type="text" id="formLinks" placeholder="EVT-001, EVT-002"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn" id="modalCancel">취소</button>
+      <button class="modal-btn primary" id="modalSave">저장</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== DATA (separate file) ===== -->
+<script src="이벤트_데이터.js"></script>
+
+<!-- ===== LOGIC ===== -->
+<script>
+// ===== STATE =====
+let selectedEventId = null;
+let activeFilters = new Set(Object.keys(CAT_CONFIG).filter(k => k !== 'chat'));
+let searchQuery = '';
+let checkedIds = new Set();
+let dayWidth = 60;
+const MIN_DAY_W = 20;
+const MAX_DAY_W = 160;
+// WEEKDAYS and MONTHS are defined in 이벤트_데이터.js
+// Use MONTHS directly (no alias needed)
+const MILESTONES = [
+  { date: '2026-04-15', label: '🏗️ 공식 착공일 (4/15)' }
+];
+const MONTH_COLORS = {
+  4: '#60a5fa',
+  5: '#34d399',
+  6: '#fbbf24',
+  7: '#f87171',
+  8: '#a78bfa'
+};
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  loadChecked();
+  loadCustomEvents();
+  updateStats();
+  renderCheckedBar();
+  renderTimeline();
+  renderEventList();
+  setupListeners();
+  setupDragScroll();
+  setupResize();
+});
+
+// ===== STORAGE =====
+function loadChecked() {
+  try {
+    const s = localStorage.getItem('haidilao_checked_events');
+    if (s) checkedIds = new Set(JSON.parse(s));
+  } catch(e) {}
+}
+function saveChecked() {
+  localStorage.setItem('haidilao_checked_events', JSON.stringify([...checkedIds]));
+}
+function loadCustomEvents() {
+  try {
+    const s = localStorage.getItem('haidilao_events_custom');
+    if (s) {
+      JSON.parse(s).forEach(e => {
+        if (!EVENTS.find(x => x.id === e.id)) EVENTS.push(e);
+      });
+    }
+  } catch(e) {}
+}
+function saveCustomEvents() {
+  const builtIn = new Set(EVENTS.slice(0, 54).map(e => e.id));
+  const custom = EVENTS.filter(e => !builtIn.has(e.id));
+  localStorage.setItem('haidilao_events_custom', JSON.stringify(custom));
+}
+
+// ===== STATS =====
+function updateStats() {
+  document.getElementById('totalEvents').textContent = EVENTS.length;
+  document.getElementById('totalChanges').textContent = EVENTS.filter(e => e.category==='change'||e.category==='drawing').length;
+  document.getElementById('totalIssues').textContent = EVENTS.filter(e => e.category==='issue').length;
+  const start = new Date('2026-04-03'), end = new Date('2026-08-30'), now = new Date();
+  const total = (end-start)/864e5, elapsed = Math.min(Math.max((now-start)/864e5,0),total);
+  const pct = Math.round((elapsed/total)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = `공정 ${pct}%`;
+}
+
+// ===== FILTERS =====
+function getFilteredEvents() {
+  let list = EVENTS.filter(e => activeFilters.has(e.category));
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    list = list.filter(e =>
+      e.title.toLowerCase().includes(q) ||
+      e.summary.toLowerCase().includes(q) ||
+      e.details.toLowerCase().includes(q) ||
+      (e.source && e.source.toLowerCase().includes(q))
+    );
+  }
+  return list.sort((a,b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+}
+function getCheckedFilteredEvents() {
+  return getFilteredEvents().filter(e => checkedIds.has(e.id));
+}
+
+// ===== CHECKED BAR =====
+function renderCheckedBar() {
+  const bar = document.getElementById('checkedBar');
+  const checked = EVENTS.filter(e => checkedIds.has(e.id)).sort((a,b) => a.date.localeCompare(b.date));
+  let html = '<span class="checked-bar-label">☑ 체크됨 (' + checked.length + '):</span>';
+  if (checked.length === 0) {
+    html += '<span class="checked-empty">이벤트를 체크하면 여기에 표시됩니다</span>';
+  } else {
+    checked.forEach(evt => {
+      const cat = CAT_CONFIG[evt.category];
+      const d = new Date(evt.date+'T00:00:00');
+      const ds = (d.getMonth()+1)+'/'+d.getDate();
+      html += `<span class="checked-chip" data-id="${evt.id}" title="${evt.title}">
+        <span class="cc-dot" style="background:${cat.color}"></span>
+        <span>${ds}</span>
+        <span style="max-width:120px;overflow:hidden;text-overflow:ellipsis">${evt.title}</span>
+        <span class="cc-remove" data-id="${evt.id}">✕</span>
+      </span>`;
+    });
+  }
+  bar.innerHTML = html;
+  // Attach remove handlers
+  bar.querySelectorAll('.cc-remove').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCheck(btn.dataset.id, false);
+    });
+  });
+  bar.querySelectorAll('.checked-chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      if (e.target.classList.contains('cc-remove')) return;
+      selectEvent(chip.dataset.id);
+      scrollToListItem(chip.dataset.id);
+    });
+  });
+}
+
+// ===== HORIZONTAL TIMELINE =====
+function renderTimeline() {
+  const canvas = document.getElementById('tlCanvas');
+  const checked = getCheckedFilteredEvents();
+
+  // Date range from ALL events
+  const allDates = EVENTS.map(e => e.date).sort();
+  if (allDates.length === 0) {
+    canvas.innerHTML = '<div class="tl-empty">이벤트 데이터가 없습니다</div>';
+    canvas.style.width = '100%';
+    canvas.style.minHeight = '100%';
+    return;
+  }
+  const startDate = new Date(allDates[0] + 'T00:00:00');
+  const endDate = new Date(allDates[allDates.length-1] + 'T00:00:00');
+  const totalDays = Math.ceil((endDate - startDate) / 864e5) + 1;
+  const pad = 50;
+
+  function dateToX(ds) {
+    const d = new Date(ds + 'T00:00:00');
+    return Math.round((d - startDate) / 864e5) * dayWidth + pad;
+  }
+
+  const canvasW = totalDays * dayWidth + pad * 2;
+
+  // Group checked events by date
+  const byDate = {};
+  checked.forEach(e => {
+    if (!byDate[e.date]) byDate[e.date] = [];
+    byDate[e.date].push(e);
+  });
+  const eventDates = Object.keys(byDate).sort();
+
+  // Max events per date (for height calculation)
+  let maxStack = 0;
+  eventDates.forEach(d => { maxStack = Math.max(maxStack, byDate[d].length); });
+
+  // Calculate strip dimensions
+  const stripW = Math.max(20, Math.min(26, dayWidth * 0.4));
+  const stripH = 480; // 세로바 길이를 추가로 2배 변경 (240 -> 480)
+  const bodyH = stripH + 40;
+
+  // Build month labels
+  let monthHtml = '';
+  let lastMonth = '';
+  // Iterate through ALL days in range to place month dividers
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(startDate.getTime() + i * 864e5);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const mKey = d.getFullYear() + '-' + m;
+    if (mKey !== lastMonth) {
+      lastMonth = mKey;
+      const x = i * dayWidth + pad;
+      const mColor = MONTH_COLORS[parseInt(m)] || 'var(--accent)';
+      monthHtml += `<div class="tl-month" style="left:${x}px; color:${mColor}; border-left-color:${mColor}">${parseInt(m)}월</div>`;
+    }
+  }
+
+  // Build day labels and lines
+  let dayHtml = '';
+  let lineHtml = '';
+  eventDates.forEach(ds => {
+    const x = dateToX(ds);
+    const d = new Date(ds + 'T00:00:00');
+    const label = (d.getMonth() + 1) + '/' + d.getDate();
+    const dow = d.getDay();
+    const isWeekend = dow === 0 || dow === 6;
+    dayHtml += `<div class="tl-day has-events${isWeekend ? ' weekend' : ''}" style="left:${x}px">${label}</div>`;
+    lineHtml += `<div class="tl-vline has-events" style="left:${x}px"></div>`;
+  });
+
+  // Month divider lines
+  lastMonth = '';
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(startDate.getTime() + i * 864e5);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const mKey = d.getFullYear() + '-' + m;
+    if (mKey !== lastMonth && lastMonth !== '') {
+      const x = i * dayWidth + pad;
+      const mColor = MONTH_COLORS[parseInt(m)] || 'var(--accent)';
+      lineHtml += `<div class="tl-month-divider" style="left:${x}px; background:${mColor}"></div>`;
+    }
+    lastMonth = mKey;
+  }
+
+  // Build event strips
+  let evtHtml = '';
+  eventDates.forEach(ds => {
+    const baseX = dateToX(ds);
+    const events = byDate[ds];
+    events.forEach((evt, i) => {
+      const x = baseX - (events.length * stripW / 2) + i * (stripW + 2);
+      const sel = evt.id === selectedEventId ? ' selected' : '';
+      const titleText = evt.title.length > 35 ? evt.title.substring(0, 35) + '…' : evt.title;
+      evtHtml += `<div class="tl-strip${sel}" data-cat="${evt.category}" data-id="${evt.id}" style="left:${x}px; width:${stripW}px; height:${stripH}px" title="${evt.id}: ${evt.title}">
+        ${titleText}
+      </div>`;
+    });
+  });
+
+  // Build milestone HTML
+  let milestoneHtml = '';
+  MILESTONES.forEach(ms => {
+    const msDate = new Date(ms.date + 'T00:00:00');
+    if (msDate >= startDate && msDate <= endDate) {
+      const x = dateToX(ms.date);
+      milestoneHtml += `
+        <div class="tl-milestone" style="left:${x}px">
+          <div class="tl-milestone-line"></div>
+          <div class="tl-milestone-label" title="${ms.date}">${ms.label}</div>
+        </div>
+      `;
+    }
+  });
+
+  // Empty placeholder if no events checked
+  let placeholderHtml = '';
+  if (checked.length === 0) {
+    placeholderHtml = '<div class="tl-body-placeholder">✨ 아래 이벤트 목록에서 체크(☑)하면 수평 타임라인에 표시됩니다</div>';
+  }
+
+  canvas.style.width = canvasW + 'px';
+  canvas.style.minHeight = (22 + 22 + bodyH) + 'px';
+  canvas.innerHTML = `
+    <div class="tl-month-row" style="width:${canvasW}px">${monthHtml}</div>
+    <div class="tl-day-row" style="width:${canvasW}px">${dayHtml}</div>
+    <div class="tl-body" style="width:${canvasW}px; height:${bodyH}px">
+      ${lineHtml}
+      ${milestoneHtml}
+      ${placeholderHtml}
+      ${evtHtml}
+    </div>
+  `;
+
+  // Click handlers for strips
+  canvas.querySelectorAll('.tl-strip').forEach(strip => {
+    strip.addEventListener('click', () => {
+      selectEvent(strip.dataset.id);
+      scrollToListItem(strip.dataset.id);
+    });
+  });
+
+  // Update zoom info
+  const pct = Math.round((dayWidth / 60) * 100);
+  document.getElementById('zoomInfo').textContent = pct + '%';
+}
+
+// ===== EVENT LIST =====
+function renderEventList() {
+  const list = document.getElementById('eventList');
+  const filtered = getFilteredEvents();
+
+  // Separate main events and chat events
+  const mainEvents = filtered.filter(e => e.category !== 'chat');
+  const chatEvents = filtered.filter(e => e.category === 'chat');
+  document.getElementById('listCount').textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="no-results-list"><span style="font-size:28px">🔍</span><p>검색 결과가 없습니다</p></div>';
+    return;
+  }
+
+  // Render main events
+  let html = '';
+  let lastMonth = '';
+  mainEvents.forEach(evt => {
+    const m = evt.date.substring(0, 7);
+    if (m !== lastMonth) {
+      lastMonth = m;
+      const [yr, mo] = m.split('-');
+      html += `<div style="padding:6px 14px;font-size:10px;font-weight:700;color:var(--accent);background:rgba(59,130,246,0.06);border-bottom:1px solid var(--border)">${parseInt(mo)}월 ${yr}</div>`;
+    }
+    html += renderEvtItem(evt);
+  });
+
+  // Render chat events in collapsible section
+  if (chatEvents.length > 0) {
+    const chatCheckedCount = chatEvents.filter(e => checkedIds.has(e.id)).length;
+    html += `<div class="chat-section-toggle" id="chatToggle">
+      <span class="toggle-icon" id="chatToggleIcon">▶</span>
+      <span class="toggle-label">💬 라크 시공그룹 대화</span>
+      <span class="toggle-count">${chatEvents.length}건${chatCheckedCount > 0 ? ' · ☑' + chatCheckedCount : ''}</span>
+    </div>`;
+    html += '<div class="chat-section-body" id="chatSection">';
+    let chatLastMonth = '';
+    chatEvents.forEach(evt => {
+      const m = evt.date.substring(0, 7);
+      if (m !== chatLastMonth) {
+        chatLastMonth = m;
+        const [yr, mo] = m.split('-');
+        html += `<div style="padding:4px 14px;font-size:10px;font-weight:600;color:var(--cat-chat);background:rgba(107,114,128,0.06);border-bottom:1px solid var(--border)">${parseInt(mo)}월 ${yr}</div>`;
+      }
+      html += renderEvtItem(evt);
+    });
+    html += '</div>';
+  }
+
+  list.innerHTML = html;
+
+  // Chat section toggle
+  const chatToggle = document.getElementById('chatToggle');
+  if (chatToggle) {
+    chatToggle.addEventListener('click', () => {
+      const body = document.getElementById('chatSection');
+      const icon = document.getElementById('chatToggleIcon');
+      body.classList.toggle('open');
+      icon.classList.toggle('open');
+    });
+  }
+
+  // Event item handlers
+  attachListHandlers(list);
+}
+
+function renderEvtItem(evt) {
+  const d = new Date(evt.date + 'T00:00:00');
+  const ds = `${d.getMonth()+1}/${d.getDate()} (${WEEKDAYS[d.getDay()]})`;
+  const isChecked = checkedIds.has(evt.id);
+  const isSelected = evt.id === selectedEventId;
+  return `<div class="evt-item${isSelected ? ' selected' : ''}" data-id="${evt.id}">
+    <input type="checkbox" class="evt-check" data-id="${evt.id}" ${isChecked ? 'checked' : ''}>
+    <span class="evt-cat-dot" data-cat="${evt.category}"></span>
+    <div class="evt-info">
+      <div class="evt-date">${ds} · ${evt.id} · ${CAT_CONFIG[evt.category]?.icon || ''} ${CAT_CONFIG[evt.category]?.label || ''}</div>
+      <div class="evt-title-text">${evt.title}</div>
+    </div>
+  </div>`;
+}
+
+function attachListHandlers(list) {
+  list.querySelectorAll('.evt-check').forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      e.stopPropagation();
+      toggleCheck(cb.dataset.id, cb.checked);
+    });
+    cb.addEventListener('click', (e) => e.stopPropagation());
+  });
+  list.querySelectorAll('.evt-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (e.target.classList.contains('evt-check')) return;
+      selectEvent(item.dataset.id);
+    });
+  });
+}
+
+function scrollToListItem(id) {
+  const el = document.querySelector(`.evt-item[data-id="${id}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ===== CHECK/UNCHECK =====
+function toggleCheck(id, checked) {
+  if (checked) checkedIds.add(id);
+  else checkedIds.delete(id);
+  saveChecked();
+  renderCheckedBar();
+  renderTimeline();
+  // Update checkbox in list without full re-render
+  const cb = document.querySelector(`.evt-check[data-id="${id}"]`);
+  if (cb) cb.checked = checked;
+}
+
+// ===== SELECT EVENT =====
+function selectEvent(id) {
+  selectedEventId = id;
+  const evt = EVENTS.find(e => e.id === id);
+  if (!evt) return;
+
+  // Update list selection
+  document.querySelectorAll('.evt-item').forEach(el => el.classList.remove('selected'));
+  const item = document.querySelector(`.evt-item[data-id="${id}"]`);
+  if (item) item.classList.add('selected');
+
+  // Update timeline selection
+  document.querySelectorAll('.tl-strip').forEach(el => el.classList.remove('selected'));
+  const strip = document.querySelector(`.tl-strip[data-id="${id}"]`);
+  if (strip) strip.classList.add('selected');
+
+  // Render detail
+  const cat = CAT_CONFIG[evt.category];
+  const dt = new Date(evt.date + 'T00:00:00');
+  const dateStr = `${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일 (${WEEKDAYS[dt.getDay()]})`;
+
+  let decisionsHtml = '';
+  if (evt.decisions && evt.decisions.length > 0) {
+    decisionsHtml = `<div class="detail-section">
+      <div class="detail-section-title">📌 주요 결정/이슈</div>
+      <ul class="detail-decisions">
+        ${evt.decisions.map(d => `<li class="${d.type}"><span style="margin-right:4px">${CAT_CONFIG[d.type]?.icon||'•'}</span>${d.text}</li>`).join('')}
+      </ul>
+    </div>`;
+  }
+
+  let linkedHtml = '';
+  if (evt.linkedEvents && evt.linkedEvents.length > 0) {
+    const links = evt.linkedEvents.map(lid => EVENTS.find(e => e.id === lid)).filter(Boolean);
+    if (links.length > 0) {
+      linkedHtml = `<div class="detail-section">
+        <div class="detail-section-title">🔗 연결된 이벤트 (${links.length})</div>
+        <div class="linked-events">
+          ${links.map(le => {
+            const ld = new Date(le.date+'T00:00:00');
+            const lds = (ld.getMonth()+1)+'/'+ld.getDate();
+            return `<div class="linked-event-card" data-id="${le.id}">
+              <span style="color:var(--text-muted)">→</span>
+              <span class="le-date">${lds}</span>
+              <span class="evt-cat-dot" data-cat="${le.category}" style="width:6px;height:6px"></span>
+              <span class="le-title">${le.title}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }
+  }
+
+  document.getElementById('detailEmpty').style.display = 'none';
+  const content = document.getElementById('detailContent');
+  content.style.display = 'block';
+  content.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-cat" data-cat="${evt.category}">${cat.icon} ${cat.label}</div>
+      <div class="detail-title">${evt.title}</div>
+      <div class="detail-date">📅 ${dateStr}　·　${evt.id}${evt.source ? `　·　📄 ${evt.source}` : ''}</div>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <div class="detail-section-title">📝 요약</div>
+        <div class="detail-text" style="font-weight:500;color:var(--text-primary);margin-bottom:12px">${evt.summary}</div>
+        <div class="detail-section-title">📄 상세 내용</div>
+        <div class="detail-text">${evt.details}</div>
+      </div>
+      ${decisionsHtml}
+      ${linkedHtml}
+    </div>
+  `;
+
+  // Linked event click handlers
+  content.querySelectorAll('.linked-event-card').forEach(le => {
+    le.addEventListener('click', () => {
+      selectEvent(le.dataset.id);
+      scrollToListItem(le.dataset.id);
+    });
+  });
+}
+
+// ===== ZOOM =====
+function zoomIn() {
+  dayWidth = Math.min(dayWidth * 1.3, MAX_DAY_W);
+  renderTimeline();
+}
+function zoomOut() {
+  dayWidth = Math.max(dayWidth / 1.3, MIN_DAY_W);
+  renderTimeline();
+}
+function zoomFit() {
+  const scroll = document.getElementById('tlScroll');
+  const allDates = EVENTS.map(e => e.date).sort();
+  if (allDates.length < 2) return;
+  const startD = new Date(allDates[0] + 'T00:00:00');
+  const endD = new Date(allDates[allDates.length-1] + 'T00:00:00');
+  const totalDays = Math.ceil((endD - startD) / 864e5) + 1;
+  const available = scroll.clientWidth - 100;
+  dayWidth = Math.max(MIN_DAY_W, Math.min(MAX_DAY_W, available / totalDays));
+  renderTimeline();
+}
+
+// ===== DRAG SCROLL =====
+function setupDragScroll() {
+  const scroll = document.getElementById('tlScroll');
+  let isDragging = false, startX, startY, scrollL, scrollT;
+
+  scroll.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.tl-strip')) return;
+    isDragging = true;
+    startX = e.pageX - scroll.offsetLeft;
+    startY = e.pageY - scroll.offsetTop;
+    scrollL = scroll.scrollLeft;
+    scrollT = scroll.scrollTop;
+    scroll.classList.add('dragging');
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scroll.offsetLeft;
+    const y = e.pageY - scroll.offsetTop;
+    scroll.scrollLeft = scrollL - (x - startX);
+    scroll.scrollTop = scrollT - (y - startY);
+  });
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    scroll.classList.remove('dragging');
+  });
+
+  // Wheel zoom (Ctrl/Meta + wheel)
+  scroll.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      if (e.deltaY < 0) zoomIn();
+      else zoomOut();
+    }
+  }, { passive: false });
+}
+
+// ===== RESIZE HANDLE =====
+function setupResize() {
+  const handle = document.getElementById('resizeHandle');
+  const tlSection = document.getElementById('timelineSection');
+  const bottomPanel = document.getElementById('bottomPanel');
+  let isResizing = false, startY, startTlH;
+
+  handle.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startY = e.clientY;
+    startTlH = tlSection.offsetHeight;
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const dy = e.clientY - startY;
+    const newH = Math.max(120, Math.min(window.innerHeight * 0.7, startTlH + dy));
+    tlSection.style.maxHeight = newH + 'px';
+    tlSection.style.flex = '0 0 ' + newH + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (isResizing) {
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+  });
+}
+
+// ===== LISTENERS =====
+function setupListeners() {
+  // Zoom buttons
+  document.getElementById('zoomIn').addEventListener('click', zoomIn);
+  document.getElementById('zoomOut').addEventListener('click', zoomOut);
+  document.getElementById('zoomFit').addEventListener('click', zoomFit);
+
+  // Filter pills
+  document.querySelectorAll('.pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const cat = pill.dataset.cat;
+      if (cat === 'all') {
+        const allActive = activeFilters.size === Object.keys(CAT_CONFIG).length;
+        if (allActive) {
+          activeFilters.clear();
+          document.querySelectorAll('.pill:not([data-cat="all"])').forEach(p => p.classList.remove('active'));
+        } else {
+          activeFilters = new Set(Object.keys(CAT_CONFIG));
+          document.querySelectorAll('.pill').forEach(p => p.classList.add('active'));
+        }
+      } else {
+        if (activeFilters.has(cat)) { activeFilters.delete(cat); pill.classList.remove('active'); }
+        else { activeFilters.add(cat); pill.classList.add('active'); }
+        const allPill = document.querySelector('.pill[data-cat="all"]');
+        if (activeFilters.size === Object.keys(CAT_CONFIG).length) allPill.classList.add('active');
+        else allPill.classList.remove('active');
+      }
+      renderTimeline();
+      renderEventList();
+    });
+  });
+
+  // Search
+  let searchTimeout;
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      searchQuery = e.target.value.trim();
+      renderTimeline();
+      renderEventList();
+    }, 200);
+  });
+
+  // Check all / Uncheck all
+  document.getElementById('btnCheckAll').addEventListener('click', () => {
+    getFilteredEvents().forEach(e => checkedIds.add(e.id));
+    saveChecked();
+    renderCheckedBar();
+    renderTimeline();
+    renderEventList();
+  });
+  document.getElementById('btnUncheckAll').addEventListener('click', () => {
+    getFilteredEvents().forEach(e => checkedIds.delete(e.id));
+    saveChecked();
+    renderCheckedBar();
+    renderTimeline();
+    renderEventList();
+  });
+
+  // Add modal
+  document.getElementById('btnAdd').addEventListener('click', openAddModal);
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalCancel').addEventListener('click', closeModal);
+  document.getElementById('modalSave').addEventListener('click', saveEvent);
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  // Export & Save
+  document.getElementById('btnExport').addEventListener('click', exportJSON);
+  document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
+  document.getElementById('btnSave').addEventListener('click', saveAllChanges);
+}
+
+// ===== MODAL =====
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = '새 이벤트 추가';
+  ['formDate','formTitle','formSummary','formDetails','formSource','formLinks'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('formCategory').value = 'confirmed';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function saveEvent() {
+  const date = document.getElementById('formDate').value;
+  const category = document.getElementById('formCategory').value;
+  const title = document.getElementById('formTitle').value.trim();
+  const summary = document.getElementById('formSummary').value.trim();
+  const details = document.getElementById('formDetails').value.trim();
+  const source = document.getElementById('formSource').value.trim();
+  const linksStr = document.getElementById('formLinks').value.trim();
+  if (!date || !title) { showToast('날짜와 제목은 필수입니다'); return; }
+  const id = 'EVT-' + String(EVENTS.length + 1).padStart(3, '0');
+  const linkedEvents = linksStr ? linksStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+  EVENTS.push({ id, date, category, title, summary: summary||title, details: details||'', decisions: [], linkedEvents, source: source||'' });
+  saveCustomEvents();
+  updateStats();
+  renderEventList();
+  closeModal();
+  showToast(`✅ ${id} 이벤트가 추가되었습니다`);
+}
+
+// ===== EXPORT =====
+function exportJSON() {
+  const data = {
+    project: "하이디라오 영등포점",
+    exportDate: new Date().toISOString(),
+    totalEvents: EVENTS.length,
+    events: EVENTS.map(e => ({ ...e, categoryLabel: CAT_CONFIG[e.category]?.label || e.category }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url;
+  a.download = `하이디라오_이벤트_${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📤 JSON 파일이 다운로드됩니다');
+}
+function exportExcel() {
+  if (typeof XLSX === 'undefined') { showToast('⏳ 엑셀 라이브러리 로딩 중...'); return; }
+  const wb = XLSX.utils.book_new();
+  const today = new Date().toISOString().slice(0,10);
+  const rows = EVENTS.map(e => ({
+    'ID': e.id, '날짜': e.date,
+    '요일': WEEKDAYS[new Date(e.date+'T00:00:00').getDay()],
+    '카테고리': CAT_CONFIG[e.category]?.label || e.category,
+    '제목': e.title, '요약': e.summary,
+    '상세내용': (e.details||'').replace(/\n/g,' '),
+    '주요결정': (e.decisions||[]).map(d=>`[${d.type}] ${d.text}`).join(' / '),
+    '연결이벤트': (e.linkedEvents||[]).join(', '),
+    '출처': e.source||''
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:9},{wch:12},{wch:4},{wch:10},{wch:40},{wch:50},{wch:80},{wch:50},{wch:25},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws, '전체 이벤트');
+  XLSX.writeFile(wb, `하이디라오_이벤트보고서_${today}.xlsx`);
+  showToast('📊 엑셀 보고서가 다운로드됩니다');
+}
+
+// ===== SAVE =====
+let hasUnsavedChanges = false;
+function markUnsaved() {
+  hasUnsavedChanges = true;
+  const btn = document.getElementById('btnSave');
+  btn.style.borderColor = 'var(--cat-change)';
+  btn.textContent = '💾 저장 *';
+}
+function saveAllChanges() {
+  saveCustomEvents();
+  saveChecked();
+  hasUnsavedChanges = false;
+  const btn = document.getElementById('btnSave');
+  btn.style.borderColor = '';
+  btn.textContent = '💾 저장';
+  showToast('✅ 변경사항이 저장되었습니다');
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+</script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</body>
+</html>
