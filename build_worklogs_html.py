@@ -467,7 +467,13 @@ function saveWorkerData(data) {{
 }}
 function getWorkers(logDate) {{
   const wd = getWorkerData();
-  return wd[logDate] || {{}};
+  if (wd[logDate] && Object.keys(wd[logDate]).length > 0) return wd[logDate];
+  // fallback: JSON 데이터의 trades 필드에서 공종별 인원 가져오기
+  const log = WORK_LOGS.logs.find(l => l.log_date === logDate);
+  if (log && log.trades && typeof log.trades === 'object') {{
+    return log.trades;
+  }}
+  return {{}};
 }}
 function setWorkers(logDate, tradeWorkers) {{
   const wd = getWorkerData();
