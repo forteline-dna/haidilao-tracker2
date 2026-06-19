@@ -1325,6 +1325,37 @@ C. 현장개설 전 제출 서류 (시공계획서, 조직도, 공정표, 보험
     ],
     linkedEvents: ["EVT-067", "EVT-075", "EVT-076"],
     source: "Lark 시공그룹 대화 (6/6~6/7)"
+  },
+  {
+    id: "EVT-078", date: "2026-05-11", category: "confirmed",
+    title: "고동색 헤어라인 SUS 마감재 확정",
+    summary: "LED간접조명 등 인테리어 마감에 고동색 헤어라인 SUS(古铜色拉丝不锈钢) 사용 확정",
+    details: `• 단면도 상 LED간접조명 주변 SUS 사양 문의 → 설계사(严工) 확인
+• 확정: 모두 고동색 헤어라인 스테인리스(古铜色拉丝不锈钢) 통일
+• 규격: 3050×1220mm SUS판 마감
+• 적용 범위: 등박스 측면(MT-02 SUS), 장식 마감 전반
+• 5/29 추가 확인: 장식 SUS 마감처리(收边)로 최종 확정`,
+    decisions: [
+      { type: "confirmed", text: "인테리어 SUS 마감재를 고동색 헤어라인 SUS(古铜色拉丝不锈钢)로 통일 확정" },
+      { type: "confirmed", text: "SUS판 규격 3050×1220mm 적용" }
+    ],
+    linkedEvents: ["EVT-068"],
+    source: "Lark 시공그룹 대화 (5/11, 5/29)"
+  },
+  {
+    id: "EVT-079", date: "2026-05-17", category: "confirmed",
+    title: "에스컬레이터 홀 방화셔터 철거 불가 확정",
+    summary: "기존 에스컬레이터 홀의 방화셔터는 철거할 수 없음 확인",
+    details: `• 에스컬레이터 홀에 설치된 기존 방화셔터(防火卷帘) 철거 불가 확정
+• 사진 2장 첨부하여 현장 상태 공유
+• 배경: 4/30 소방법 변경으로 방화셔터 단독 설치 불가 확인 → 기존 설치분은 유지
+• 방화셔터 주변 마감은 고동색 SUS판(3050×1220)으로 처리`,
+    decisions: [
+      { type: "confirmed", text: "에스컬레이터 홀 방화셔터 철거 불가 — 기존 유지" },
+      { type: "confirmed", text: "방화셔터 주변 고동색 SUS판 마감 처리" }
+    ],
+    linkedEvents: ["EVT-070", "EVT-078"],
+    source: "Lark 시공그룹 대화 (5/17)"
   }
 ];
 
