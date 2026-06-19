@@ -490,13 +490,19 @@ function renderStats() {
   const allTrades = new Set(logs.flatMap(l => Object.keys(l.trade_details || {})));
   const avgWorkers = workedDays > 0 ? Math.round(totalWorkers / workedDays) : 0;
 
+  const endDate = new Date('2026-08-16');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const daysLeft = Math.ceil((endDate - today) / (1000*60*60*24));
+  const dDayText = daysLeft > 0 ? `D-${daysLeft}` : daysLeft === 0 ? 'D-Day' : `D+${Math.abs(daysLeft)}`;
+  const dDayColor = daysLeft > 30 ? '#3b82f6' : daysLeft > 14 ? '#f59e0b' : '#ef4444';
+
   const stats = [
     { val: logs.length, label:'총 시공일지', color:'#6366f1' },
     { val: totalWorkers + '명', label:'총 투입인원', color:'#10b981' },
     { val: workedDays + '일', label:'인원 입력일', color:'#f59e0b' },
     { val: avgWorkers + '명', label:'일 평균 인원', color:'#a855f7' },
     { val: allTrades.size, label:'공종 수', color:'#06b6d4' },
-    { val: WORK_LOGS.period?.split(' ~ ')[0] || '-', label:'착공일', color:'#3b82f6' },
+    { val: dDayText, label:'준공까지 (8/16)', color: dDayColor },
   ];
   document.getElementById('statsRow').innerHTML = stats.map(s => `
     <div class="stat-card">
