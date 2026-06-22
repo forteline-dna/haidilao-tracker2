@@ -1,8 +1,8 @@
 {
   "project": "하이디라오 영등포점 (하이디라오 한국 영등포점 프로젝트)",
   "data_source": "Lark 시공그룹 채팅 자동 수집",
-  "total_logs": 63,
-  "period": "2026-04-16 ~ 2026-06-18",
+  "total_logs": 64,
+  "period": "2026-04-16 ~ 2026-06-22",
   "logs": [
     {
       "log_date": "2026-04-16",
@@ -9717,6 +9717,18 @@
       "work_categories_kr": [
         "검수/확인"
       ]
+    },
+    {
+      "log_date": "2026-06-22",
+      "upload_date": "2026-06-22",
+      "upload_time": "18:56",
+      "file_name": "하이디라오 한국 영등포점 프로젝트 시공일지-20260622.pdf",
+      "file_key": "file_v3_0012t_4b6e36d4-dd23-42b1-bce2-e1b35fc0ffeg",
+      "message_id": "om_x100b6ca4223e84a4b2a23633003d575",
+      "sender_id": "ou_23ad0b67fc598bd37dbeebc9f74d6b1e",
+      "work_categories": [],
+      "day_highlights": [],
+      "total_messages": 2
     }
   ],
   "trade_system": {
@@ -9767,5 +9779,5 @@
     }
   },
   "last_enhanced": "2026-06-19 08:56:32 KST",
-  "last_updated": "2026-06-19 08:36:03 KST"
+  "last_updated": "2026-06-23 08:22:03 KST"
 }
