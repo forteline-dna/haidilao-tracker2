@@ -932,13 +932,137 @@ body {
 .editing .editable-hint { display: block; }
 
 /* ===== RESPONSIVE ===== */
+/* 1. 태블릿 대응 (1200px 이하) */
+@media (max-width: 1200px) {
+  .event-list-wrap {
+    width: 400px;
+    min-width: 350px;
+  }
+}
+
+/* 2. 소형 태블릿 및 세로 모드 (1024px 이하 - 갤럭시 탭 S8 울트라 등) */
+@media (max-width: 1024px) {
+  .event-list-wrap {
+    width: 350px;
+    min-width: 300px;
+  }
+  .header-right {
+    gap: 4px;
+  }
+  .progress-wrap {
+    width: 60px;
+  }
+}
+
+/* 3. 모바일 대응 (768px 이하 - 갤럭시 S25 등 휴대폰) */
 @media (max-width: 768px) {
-  .event-list-wrap { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); }
-  .bottom-panel { flex-direction: column; }
-  .header-right { display: none; }
-  .toolbar { padding: 6px 12px; }
-  .search-box { flex: 1; }
-  .pills { display: none; }
+  html, body {
+    height: auto;
+    overflow: auto;
+  }
+  body {
+    display: block;
+  }
+  .top-fixed {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  /* 헤더 모바일 컴팩트화 */
+  .header {
+    padding: 8px 16px;
+    gap: 8px;
+  }
+  .header-logo {
+    font-size: 16px;
+  }
+  .header-title {
+    font-size: 13px;
+  }
+  .header-sub {
+    font-size: 9px;
+  }
+  .header-right {
+    display: none; /* 모바일에서는 세세한 스탯 요약 숨김 */
+  }
+
+  /* 툴바 모바일 배치: 검색과 필터를 세로로 쌓고, 필터는 가로 스크롤 가능하게 함 */
+  .toolbar {
+    padding: 8px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .search-box {
+    flex: none;
+    width: 100%;
+  }
+  .pills {
+    display: flex;
+    flex: none;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    gap: 4px;
+  }
+  .pill {
+    flex-shrink: 0;
+  }
+  .toolbar-btns {
+    width: 100%;
+    justify-content: space-between;
+    margin-left: 0;
+  }
+  .tbtn {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+  }
+
+  /* 체크 바 모바일 가로 스크롤 활성화 */
+  .checked-bar {
+    padding: 6px 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 타임라인 섹션 모바일 축소 */
+  .timeline-section {
+    min-height: 280px;
+    max-height: 45vh;
+  }
+  
+  /* 바텀 패널 (리스트 + 디테일) 모바일 세로 배치 */
+  .bottom-panel {
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+    min-height: auto;
+  }
+  
+  .event-list-wrap {
+    width: 100%;
+    min-width: unset;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    height: 400px; /* 리스트 영역을 적절한 높이로 고정 */
+    flex-shrink: 0;
+  }
+
+  .detail-panel {
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+  }
+  
+  .detail-header {
+    padding: 16px;
+  }
+  .detail-body {
+    padding: 16px;
+  }
 }
 </style>
 </head>
