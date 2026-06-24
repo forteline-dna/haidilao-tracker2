@@ -32,6 +32,7 @@ KST = timezone(timedelta(hours=9))
 TOKEN_FILE = os.path.join(BASE_DIR, 'lark_user_token.txt')
 RAW_MSG_FILE = os.path.join(BASE_DIR, 'lark_raw_messages.json')
 TRACKER_HTML = os.path.join(BASE_DIR, '하이디라오_이벤트트래커.html')
+TRACKER_DATA_JS = os.path.join(BASE_DIR, '이벤트_데이터.js')
 WORKLOG_HTML = os.path.join(BASE_DIR, '하이디라오_작업일지.html')
 WORKLOG_DATA = os.path.join(BASE_DIR, '작업일지_데이터.json')
 LOG_FILE = os.path.join(BASE_DIR, '.daily_update.log')
@@ -295,26 +296,26 @@ def msg_timestamp(m):
 # ═══════════════════════════════════════════════════════
 
 def get_existing_chat_event_ids():
-    """HTML에서 현재 존재하는 채팅 이벤트 ID 추출"""
-    if not os.path.exists(TRACKER_HTML):
+    """이벤트_데이터.js에서 현재 존재하는 채팅 이벤트 ID 추출"""
+    if not os.path.exists(TRACKER_DATA_JS):
         return set(), 0
-    with open(TRACKER_HTML, encoding='utf-8') as f:
-        html = f.read()
-    ids = set(re.findall(r'id: "(EVT-\d+)".*?category: "chat"', html))
+    with open(TRACKER_DATA_JS, encoding='utf-8') as f:
+        js_content = f.read()
+    ids = set(re.findall(r'id:\s*"(EVT-\d+)".*?category:\s*"chat"', js_content))
     # 마지막 EVT 번호
-    all_ids = re.findall(r'EVT-(\d+)', html)
+    all_ids = re.findall(r'EVT-(\d+)', js_content)
     max_num = max(int(x) for x in all_ids) if all_ids else 0
     return ids, max_num
 
 
 def get_existing_chat_dates():
-    """HTML에서 이미 존재하는 채팅 이벤트 날짜 추출"""
-    if not os.path.exists(TRACKER_HTML):
+    """이벤트_데이터.js에서 이미 존재하는 채팅 이벤트 날짜 추출"""
+    if not os.path.exists(TRACKER_DATA_JS):
         return set()
-    with open(TRACKER_HTML, encoding='utf-8') as f:
-        html = f.read()
-    # "라크 시공 그룹 대화 — 2026-XX-XX" 패턴
-    dates = set(re.findall(r'라크 시공 그룹 대화 — (\d{4}-\d{2}-\d{2})', html))
+    with open(TRACKER_DATA_JS, encoding='utf-8') as f:
+        js_content = f.read()
+    # title: "라크 시공 그룹 대화 — 2026-XX-XX (N건)" 패턴
+    dates = set(re.findall(r'라크 시공 그룹 대화 — (\d{4}-\d{2}-\d{2})', js_content))
     return dates
 
 
@@ -397,9 +398,9 @@ def build_chat_event_js(evt_id, date_str, msgs):
 
 
 def update_event_tracker(messages):
-    """이벤트 트래커 HTML에 새 채팅 이벤트 추가"""
-    if not os.path.exists(TRACKER_HTML):
-        log('⚠️ 이벤트 트래커 HTML 파일 없음')
+    """이벤트 트래커 데이터 파일(이벤트_데이터.js)에 새 채팅 이벤트 추가"""
+    if not os.path.exists(TRACKER_DATA_JS):
+        log('⚠️ 이벤트 트래커 데이터 JS 파일 없음')
         return 0
 
     existing_dates = get_existing_chat_dates()
@@ -427,34 +428,26 @@ def update_event_tracker(messages):
         log('ℹ️ 이벤트 트래커: 신규 채팅 이벤트 없음')
         return 0
 
-    # HTML 수정
-    with open(TRACKER_HTML, encoding='utf-8') as f:
-        html = f.read()
+    # JS 파일 수정
+    with open(TRACKER_DATA_JS, encoding='utf-8') as f:
+        js_content = f.read()
 
-    # 1) EVENTS 배열 끝에 삽입 (]; 앞)
-    last_close = html.rfind('    source: "Lark 시공그룹 채팅"\n  }\n];')
-    if last_close < 0:
-        # 다른 source로 끝나는 경우 대비
-        last_close = html.rfind('\n];')
-    if last_close < 0:
-        log('❌ EVENTS 배열 끝을 찾을 수 없음')
+    # EVENTS 배열의 끝 찾기
+    insert_pattern = '];\n\n// ===== CATEGORY CONFIG ====='
+    insert_pos = js_content.find(insert_pattern)
+    if insert_pos < 0:
+        config_pos = js_content.find('// ===== CATEGORY CONFIG =====')
+        if config_pos > 0:
+            insert_pos = js_content.rfind('\n];', 0, config_pos)
+            if insert_pos > 0:
+                insert_pos = insert_pos + 1
+            
+    if insert_pos < 0:
+        log('❌ 이벤트_데이터.js 내 EVENTS 배열의 끝을 찾을 수 없음')
         return 0
 
-    insert_pos = html.rfind('\n];')
     new_events_js = ",\n\n".join([e['js'] for e in new_events])
-    html = html[:insert_pos] + ",\n\n" + new_events_js + html[insert_pos:]
-
-    # 2) builtInIds 업데이트
-    old_builtin = re.search(r"const builtInIds = new Set\(\[[\s\S]*?\]\);", html)
-    if old_builtin:
-        all_ids = [f"'EVT-{i:03d}'" for i in range(1, next_num)]
-        lines = []
-        for i in range(0, len(all_ids), 8):
-            chunk = ", ".join(all_ids[i:i+8])
-            lines.append(f"    {chunk}")
-        formatted = ",\n".join(lines)
-        new_builtin = f"const builtInIds = new Set([\n{formatted}\n  ]);"
-        html = html[:old_builtin.start()] + new_builtin + html[old_builtin.end():]
+    js_content = js_content[:insert_pos] + ",\n\n" + new_events_js + "\n" + js_content[insert_pos:]
 
     # 3) 역방향 링크 추가
     reverse_links = defaultdict(list)
@@ -464,13 +457,13 @@ def update_event_tracker(messages):
 
     for evt_id, chat_ids in reverse_links.items():
         pattern = f'id: "{evt_id}"'
-        idx = html.find(pattern)
+        idx = js_content.find(pattern)
         if idx < 0:
             continue
-        search_end = html.find("source:", idx)
+        search_end = js_content.find("source:", idx)
         if search_end < 0:
             continue
-        section = html[idx:search_end]
+        section = js_content[idx:search_end]
         linked_match = re.search(r'linkedEvents:\s*\[([^\]]*)\]', section)
         if not linked_match:
             continue
@@ -482,10 +475,10 @@ def update_event_tracker(messages):
         new_linked = ", ".join([f'"{e}"' for e in existing_ids])
         old_full = linked_match.group(0)
         new_full = f"linkedEvents: [{new_linked}]"
-        html = html[:idx] + section.replace(old_full, new_full) + html[search_end:]
+        js_content = js_content[:idx] + section.replace(old_full, new_full) + js_content[search_end:]
 
-    with open(TRACKER_HTML, 'w', encoding='utf-8') as f:
-        f.write(html)
+    with open(TRACKER_DATA_JS, 'w', encoding='utf-8') as f:
+        f.write(js_content)
 
     log(f'✅ 이벤트 트래커: {len(new_events)}개 신규 채팅 이벤트 추가!')
     for e in new_events:
