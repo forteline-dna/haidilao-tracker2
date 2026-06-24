@@ -31,7 +31,7 @@ TRADE_MAP = {
     # 중국어
     '管理人员':      '관리인원',
     '翻译':          '번역',
-    '现场班长':      '직영반장',
+    '现场班长':      '현장반장',
     '木工':          '목공',
     '电工':          '전기공',
     '水泥工':        '미장공',
@@ -214,7 +214,8 @@ def parse_pdf(pdf_path):
         
         rows = []
         for it in left_items:
-            if any(kw in it['text'] for kw in ('人', '명', '总计', '總計', '총', '합계')):
+            # 합계 행만 제외 (공종명에 '人员'이 포함될 수 있어 '人' 단독 필터는 쓰지 않음)
+            if any(kw in it['text'] for kw in ('总计', '總計', '합계', '人数总计', '총 시공')):
                 continue
             matched = False
             for r in rows:
@@ -231,18 +232,31 @@ def parse_pdf(pdf_path):
             trade_cn = ""
             count = 0
             work_cn_list = []
-            
+
             for it in r['items']:
                 x = it['text'].strip()
                 if not x:
                     continue
                 if it['x'] < 130:
-                    trade_cn = x
+                    # 좌측 컬럼: 공종명. 신형 PDF는 같은 블록에 '공종명⏎인원수'가 합쳐져 있음
+                    parts = [p.strip() for p in x.split('\n') if p.strip()]
+                    if parts:
+                        trade_cn = parts[0]
+                        for p in parts[1:]:
+                            if re.match(r'^\d+$', p):
+                                count = int(p)
+                    # 헤더 행 제외
+                    if trade_cn in ('工种', '人数', '공종', '인원수'):
+                        trade_cn = ""
                 elif 130 <= it['x'] < 220:
+                    # 구형(한글 번역본) PDF: 인원수가 별도 컬럼에 있음
                     if re.match(r'^\d+$', x):
                         count = int(x)
                 else:
-                    work_cn_list.append(x)
+                    for p in x.split('\n'):
+                        p = p.strip()
+                        if p:
+                            work_cn_list.append(p)
             
             if trade_cn:
                 trade_ko_std = translate_trade(trade_cn)

@@ -5,3 +5,4 @@ lark_raw_messages.json
 *.log
 .tempmediaStorage/
 browser/
+lark_refresh_token.txt

@@ -30,6 +30,7 @@ CHAT_ID = 'oc_943f27f012a4da28abb89083bc7095a3'
 KST = timezone(timedelta(hours=9))
 
 TOKEN_FILE = os.path.join(BASE_DIR, 'lark_user_token.txt')
+REFRESH_FILE = os.path.join(BASE_DIR, 'lark_refresh_token.txt')
 RAW_MSG_FILE = os.path.join(BASE_DIR, 'lark_raw_messages.json')
 TRACKER_HTML = os.path.join(BASE_DIR, '하이디라오_이벤트트래커.html')
 TRACKER_DATA_JS = os.path.join(BASE_DIR, '이벤트_데이터.js')
@@ -134,6 +135,59 @@ def get_token():
         return f.read().strip()
 
 
+def get_refresh_token():
+    if not os.path.exists(REFRESH_FILE):
+        return None
+    with open(REFRESH_FILE) as f:
+        return f.read().strip()
+
+
+def _get_app_token():
+    """App Access Token 발급 (내부용)"""
+    d = json.dumps({'app_id': APP_ID, 'app_secret': APP_SECRET}).encode()
+    r = Request(f'{DOMAIN}/open-apis/auth/v3/app_access_token/internal',
+                data=d, headers={'Content-Type': 'application/json'})
+    with urlopen(r, timeout=15) as resp:
+        return json.loads(resp.read().decode())['app_access_token']
+
+
+def _save_tokens(tok_data):
+    """OIDC 응답에서 access_token + refresh_token 저장"""
+    user_token = tok_data['access_token']
+    with open(TOKEN_FILE, 'w') as f:
+        f.write(user_token)
+    rt = tok_data.get('refresh_token')
+    if rt:
+        with open(REFRESH_FILE, 'w') as f:
+            f.write(rt)
+    return user_token
+
+
+def refresh_via_refresh_token():
+    """저장된 refresh_token으로 브라우저 없이 자동 갱신.
+    성공 시 새 User Token 반환, 실패 시 None (→ 수동 재인증 필요)."""
+    rt = get_refresh_token()
+    if not rt:
+        return None
+    try:
+        app_token = _get_app_token()
+        d = json.dumps({'grant_type': 'refresh_token', 'refresh_token': rt}).encode()
+        r = Request(f'{DOMAIN}/open-apis/authen/v1/oidc/refresh_access_token',
+                    data=d, headers={'Content-Type': 'application/json',
+                                     'Authorization': f'Bearer {app_token}'})
+        with urlopen(r, timeout=15) as resp:
+            tok = json.loads(resp.read().decode())
+        if tok.get('code') not in (0, None) or 'data' not in tok:
+            log(f'  ⚠️ refresh_token 갱신 거부 (code={tok.get("code")}): {tok.get("msg","")}')
+            return None
+        user_token = _save_tokens(tok['data'])
+        log('  🔄 refresh_token으로 자동 갱신 성공')
+        return user_token
+    except Exception as e:
+        log(f'  ⚠️ 자동 갱신 실패: {e}')
+        return None
+
+
 def refresh_token():
     """브라우저 OAuth로 새 User Access Token 발급"""
     import http.server, webbrowser, threading, time
@@ -176,11 +230,7 @@ def refresh_token():
         return None
 
     # App Token
-    d = json.dumps({'app_id': APP_ID, 'app_secret': APP_SECRET}).encode()
-    r = Request(f'{DOMAIN}/open-apis/auth/v3/app_access_token/internal',
-                data=d, headers={'Content-Type': 'application/json'})
-    with urlopen(r, timeout=15) as resp:
-        app_token = json.loads(resp.read().decode())['app_access_token']
+    app_token = _get_app_token()
 
     # User Token
     d2 = json.dumps({'grant_type': 'authorization_code', 'code': result['code']}).encode()
@@ -190,10 +240,8 @@ def refresh_token():
     with urlopen(r2, timeout=15) as resp:
         tok = json.loads(resp.read().decode())
 
-    user_token = tok['data']['access_token']
-    with open(TOKEN_FILE, 'w') as f:
-        f.write(user_token)
-    log('✅ 새 User Token 발급 완료')
+    user_token = _save_tokens(tok['data'])
+    log('✅ 새 User Token 발급 완료 (refresh_token 저장됨)')
     return user_token
 
 
@@ -653,16 +701,23 @@ def main():
             log('❌ 토큰 없음! python3 daily_update.py --token')
             return
 
-    # 메시지 수집
-    if '--full' in sys.argv:
-        log('📨 전체 기간 메시지 수집 중...')
-        messages = fetch_all_messages(token)
-    else:
+    # 메시지 수집 (토큰 만료 시 refresh_token으로 1회 자동 갱신 후 재시도)
+    def _collect(tok):
+        if '--full' in sys.argv:
+            log('📨 전체 기간 메시지 수집 중...')
+            return fetch_all_messages(tok)
         log('📨 최근 26시간 메시지 확인 중...')
-        messages = fetch_messages(token, hours_back=26)
+        return fetch_messages(tok, hours_back=26)
 
+    messages = _collect(token)
     if messages is None:
-        log('💡 토큰 만료! python3 daily_update.py --token')
+        log('💡 토큰 만료 — refresh_token으로 자동 갱신 시도...')
+        new_token = refresh_via_refresh_token()
+        if new_token:
+            token = new_token
+            messages = _collect(token)
+    if messages is None:
+        log('❌ 자동 갱신 실패. 수동 재인증 필요: python3 daily_update.py --token')
         return
 
     log(f'  {len(messages)}개 메시지 수신')
@@ -674,21 +729,48 @@ def main():
     # Raw 보관
     update_raw_messages(messages)
 
-    # 이벤트 트래커 업데이트
+    # 이벤트 트래커 업데이트 (채팅 이벤트)
     log('')
     log('── 이벤트 트래커 업데이트 ──')
     evt_added = update_event_tracker(messages)
+
+    # 회의록 문서 → meeting 이벤트 자동 추가
+    log('')
+    log('── 회의록 자동 처리 ──')
+    mtg_added = 0
+    try:
+        sys.path.insert(0, BASE_DIR)
+        import meeting_minutes
+        mtg_added = meeting_minutes.process_meeting_minutes(token, messages)
+    except Exception as e:
+        log(f'⚠️ 회의록 처리 실패(건너뜀): {e}')
 
     # 작업일지 업데이트
     log('')
     log('── 작업일지 업데이트 ──')
     wl_added = update_work_logs(messages)
 
+    # 공종별 작업자 파싱 + 고도화 (PDF 인원표 → trades, 채팅 → 상세, HTML 동기화)
+    log('')
+    log('── 공종별 작업자 파싱 + 고도화 ──')
+    try:
+        sys.path.insert(0, BASE_DIR)
+        import parse_and_apply, enhance_work_logs
+        parse_and_apply.main()
+        enhance_work_logs.main()
+        with open(WORKLOG_DATA, encoding='utf-8') as f:
+            _data = json.load(f)
+        parse_and_apply.update_html(_data)
+        log('✅ 공종별 작업자 파싱/고도화/HTML 동기화 완료')
+    except Exception as e:
+        log(f'⚠️ 공종별 고도화 실패(건너뜀): {e}')
+
     # 요약
     log('')
     log('═' * 55)
     log(f'  🏁 업데이트 완료!')
     log(f'     이벤트 트래커: +{evt_added}개 채팅 이벤트')
+    log(f'     회의록:       +{mtg_added}개 회의 이벤트')
     log(f'     작업일지:     +{wl_added}개 시공일지')
     log('═' * 55)
 

@@ -392,6 +392,31 @@ def step_update_data(messages):
 
 
 # ════════════════════════════════════════
+#  STEP 4: 공종별 작업자 파싱 + 고도화
+# ════════════════════════════════════════
+
+def step_enrich():
+    """PDF에서 공종별 인원 파싱 → 채팅 기반 공종 상세/번역 → HTML 동기화.
+    parse_and_apply(전체 PDF 재파싱) → enhance_work_logs → HTML 재동기화 순서."""
+    sys.path.insert(0, BASE_DIR)
+    try:
+        import parse_and_apply, enhance_work_logs
+        # 1) PDF 공종표 파싱 (trades, 총인원, 시공내용) → JSON + HTML
+        parse_and_apply.main()
+        # 2) 채팅 기반 공종 상세 + worker_count + 한국어 번역 → JSON
+        enhance_work_logs.main()
+        # 3) 최종 JSON으로 HTML 재동기화 (enhance가 JSON만 갱신하므로)
+        with open(DATA_FILE, encoding='utf-8') as f:
+            data = json.load(f)
+        parse_and_apply.update_html(data)
+        log('  ✅ 공종별 작업자 파싱/고도화/HTML 동기화 완료')
+        return True
+    except Exception as e:
+        log(f'  ⚠️ 공종별 고도화 실패(건너뜀): {e}')
+        return False
+
+
+# ════════════════════════════════════════
 #  MAIN
 # ════════════════════════════════════════
 
@@ -415,8 +440,21 @@ def main():
     log('── STEP 1: Lark 메시지 수집 ──')
     messages = fetch_messages(token, hours_back=28)  # 여유 있게 28시간
     if messages == 'TOKEN_EXPIRED':
-        log('❌ 토큰 만료! 수동 재인증 필요: python3 morning_update.py --token')
-        return 1
+        # refresh_token으로 브라우저 없이 자동 갱신 시도
+        log('  토큰 만료 — refresh_token으로 자동 갱신 시도...')
+        sys.path.insert(0, BASE_DIR)
+        try:
+            from daily_update import refresh_via_refresh_token
+            new_token = refresh_via_refresh_token()
+        except Exception as e:
+            log(f'  ⚠️ 자동 갱신 모듈 오류: {e}')
+            new_token = None
+        if new_token:
+            token = new_token
+            messages = fetch_messages(token, hours_back=28)
+        if messages == 'TOKEN_EXPIRED' or not new_token:
+            log('❌ 자동 갱신 실패! 수동 재인증 필요: python3 morning_update.py --token')
+            return 1
     if not messages:
         log('  ℹ️ 새 메시지 없음')
         return 0
@@ -436,6 +474,21 @@ def main():
     log('')
     log('── STEP 3: 작업일지 데이터/HTML 업데이트 ──')
     data_count = step_update_data(messages)
+
+    # 공종별 작업자 파싱 + 고도화 (PDF 인원표 → trades, 채팅 → 상세)
+    log('')
+    log('── STEP 4: 공종별 작업자 파싱 + 고도화 ──')
+    step_enrich()
+
+    # 회의록 문서 → meeting 이벤트 자동 추가
+    log('')
+    log('── STEP 5: 회의록 자동 처리 ──')
+    try:
+        sys.path.insert(0, BASE_DIR)
+        import meeting_minutes
+        meeting_minutes.process_meeting_minutes(token, messages)
+    except Exception as e:
+        log(f'  ⚠️ 회의록 처리 실패(건너뜀): {e}')
 
     # 완료 요약
     elapsed = (datetime.now(KST) - start_time).seconds
