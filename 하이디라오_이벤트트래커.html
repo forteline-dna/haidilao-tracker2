@@ -28,6 +28,7 @@
   --cat-meeting: #2c5aa0;
   --cat-drawing: #1a7a7a;
   --cat-schedule: #a0365e;
+  --cat-report: #c2410c;
   --cat-chat: #888888;
   --radius: 3px;
   --radius-sm: 2px;
@@ -160,6 +161,7 @@ body {
 .pill[data-cat="meeting"].active { background: var(--cat-meeting); border-color: var(--cat-meeting); color: #fff; }
 .pill[data-cat="drawing"].active { background: var(--cat-drawing); border-color: var(--cat-drawing); color: #fff; }
 .pill[data-cat="schedule"].active { background: var(--cat-schedule); border-color: var(--cat-schedule); color: #fff; }
+.pill[data-cat="report"].active { background: var(--cat-report); border-color: var(--cat-report); color: #fff; }
 .pill[data-cat="chat"].active { background: var(--cat-chat); border-color: var(--cat-chat); color: #fff; }
 .toolbar-btns { display: flex; gap: 4px; margin-left: auto; }
 .tbtn {
@@ -404,6 +406,7 @@ body {
 .tl-strip[data-cat="meeting"]   { --cat-color: var(--cat-meeting); --cat-rgb: 44,90,160; }
 .tl-strip[data-cat="drawing"]   { --cat-color: var(--cat-drawing); --cat-rgb: 26,122,122; }
 .tl-strip[data-cat="schedule"]  { --cat-color: var(--cat-schedule); --cat-rgb: 160,54,94; }
+.tl-strip[data-cat="report"]    { --cat-color: var(--cat-report); --cat-rgb: 194,65,12; }
 .tl-strip[data-cat="chat"]      { --cat-color: var(--cat-chat); --cat-rgb: 136,136,136; }
 
 .tl-empty {
@@ -532,6 +535,7 @@ body {
 .evt-cat-dot[data-cat="meeting"]   { background: var(--cat-meeting); }
 .evt-cat-dot[data-cat="drawing"]   { background: var(--cat-drawing); }
 .evt-cat-dot[data-cat="schedule"]  { background: var(--cat-schedule); }
+.evt-cat-dot[data-cat="report"]    { background: var(--cat-report); }
 .evt-cat-dot[data-cat="chat"]      { background: var(--cat-chat); }
 .evt-info { flex: 1; min-width: 0; }
 .evt-date { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
@@ -596,6 +600,7 @@ body {
 .detail-cat[data-cat="meeting"]   { background: rgba(44,90,160,0.1); color: var(--cat-meeting); }
 .detail-cat[data-cat="drawing"]   { background: rgba(26,122,122,0.1); color: var(--cat-drawing); }
 .detail-cat[data-cat="schedule"]  { background: rgba(160,54,94,0.1); color: var(--cat-schedule); }
+.detail-cat[data-cat="report"]    { background: rgba(194,65,12,0.1); color: var(--cat-report); }
 .detail-cat[data-cat="chat"]      { background: rgba(136,136,136,0.1); color: var(--cat-chat); }
 
 /* Chat section collapsible */
@@ -1100,6 +1105,7 @@ body {
       <span class="pill active" data-cat="meeting">📋 회의</span>
       <span class="pill active" data-cat="drawing">📐 도면</span>
       <span class="pill active" data-cat="schedule">📅 일정</span>
+      <span class="pill active" data-cat="report">📊 주간보고</span>
       <span class="pill" data-cat="chat">💬 라크</span>
     </div>
     <div class="toolbar-btns">

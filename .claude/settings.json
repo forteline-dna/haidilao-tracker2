@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"/Users/jason-mac/Documents/안티그래비티/0616 lark mcp연결/일일작업일보\" && ls -1 | tail -12; echo \"--- 파싱된 PDF 개수 vs 전체 ---\"; cd \"..\" && /usr/bin/python3 parse_and_apply.py --dry 2>&1 | grep -c \"📄\"; echo \"\\(전체 PDF:\\)\"; ls -1 일일작업일보/*.pdf | wc -l)",
+      "Read(//Users/jason-mac/Documents/안티그래비티/**)",
+      "Bash(awk '/2026-06-1[4-8]/{p=1} /2026-06-22/{p=0} p' /tmp/parse_dry.txt)",
+      "Bash(/usr/bin/python3 parse_and_apply.py)",
+      "Bash(/usr/bin/python3 enhance_work_logs.py)",
+      "Bash(/usr/bin/python3 -c ' *)",
+      "Bash(ls -1 작업일지_데이터.backup_*.json)",
+      "Bash(/usr/bin/python3 -c \"import docx; print\\('python-docx OK'\\)\")",
+      "Bash(grep -nA2 \"meeting\" 이벤트_데이터.js)",
+      "Bash(textutil -convert txt \"회의록/2026.04.20 현장회의록 现场会议录.doc\" -stdout)",
+      "Bash(/usr/bin/python3 meeting_minutes.py --scan)"
+    ]
+  }
+}
