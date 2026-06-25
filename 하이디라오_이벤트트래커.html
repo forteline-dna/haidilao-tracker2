@@ -1951,21 +1951,90 @@ function saveEvent() {
 // ===== EXPORT =====
 function exportExcel() {
   if (typeof XLSX === 'undefined') { showToast('⏳ 엑셀 라이브러리 로딩 중...'); return; }
-  const wb = XLSX.utils.book_new();
   const today = new Date().toISOString().slice(0,10);
-  const rows = EVENTS.map(e => ({
-    'ID': e.id, '날짜': e.date,
-    '요일': WEEKDAYS[new Date(e.date+'T00:00:00').getDay()],
-    '카테고리': CAT_CONFIG[e.category]?.label || e.category,
-    '제목': e.title, '요약': e.summary,
-    '상세내용': (e.details||'').replace(/\n/g,' '),
-    '주요결정': (e.decisions||[]).map(d=>`[${d.type}] ${d.text}`).join(' / '),
-    '연결이벤트': (e.linkedEvents||[]).join(', '),
-    '출처': e.source||''
-  }));
-  const ws = XLSX.utils.json_to_sheet(rows);
-  ws['!cols'] = [{wch:9},{wch:12},{wch:4},{wch:10},{wch:40},{wch:50},{wch:80},{wch:50},{wch:25},{wch:30}];
-  XLSX.utils.book_append_sheet(wb, ws, '전체 이벤트');
+  const FONT = '맑은 고딕';
+  // 카테고리별 색상 (HTML --cat-* 와 동일)
+  const CAT_HEX = {
+    confirmed:'2D8A56', change:'B8860B', issue:'C0392B', cost:'6B3FA0',
+    meeting:'2C5AA0', drawing:'1A7A7A', schedule:'A0365E', report:'C2410C', chat:'888888'
+  };
+  const HEADERS = ['ID','날짜','요일','카테고리','제목','요약','상세내용','주요결정','연결이벤트','출처'];
+  const nCols = HEADERS.length;
+
+  // 날짜순 정렬
+  const evs = [...EVENTS].sort((a,b)=> a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+  const dataRows = evs.map(e => [
+    e.id, e.date,
+    WEEKDAYS[new Date(e.date+'T00:00:00').getDay()],
+    CAT_CONFIG[e.category]?.label || e.category,
+    e.title, e.summary,
+    (e.details||'').replace(/\n/g,' '),
+    (e.decisions||[]).map(d=>`[${d.type}] ${d.text}`).join(' / '),
+    (e.linkedEvents||[]).join(', '),
+    e.source||''
+  ]);
+
+  const blank = Array(nCols-1).fill('');
+  const aoa = [
+    ['하이디라오 영등포점 · 이벤트 트래커', ...blank],
+    [`내보낸 날짜 ${today}  ·  총 ${evs.length}건`, ...blank],
+    HEADERS,
+    ...dataRows
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const HROW = 2; // 헤더 행(0-based)
+
+  ws['!cols']   = [{wch:9},{wch:12},{wch:5},{wch:11},{wch:38},{wch:50},{wch:70},{wch:40},{wch:18},{wch:28}];
+  ws['!merges'] = [
+    {s:{r:0,c:0}, e:{r:0,c:nCols-1}},
+    {s:{r:1,c:0}, e:{r:1,c:nCols-1}}
+  ];
+  ws['!rows'] = [{hpt:30},{hpt:20},{hpt:24}];
+
+  const bd = { style:'thin', color:{rgb:'D9D9D9'} };
+  const BORDER = { top:bd, bottom:bd, left:bd, right:bd };
+
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let R=range.s.r; R<=range.e.r; R++) {
+    for (let C=range.s.c; C<=range.e.c; C++) {
+      const addr = XLSX.utils.encode_cell({r:R,c:C});
+      const cell = ws[addr] || (ws[addr] = {t:'s', v:''});
+      if (R === 0) {                       // 제목
+        cell.s = { font:{name:FONT, sz:16, bold:true, color:{rgb:'FFFFFF'}},
+                   fill:{patternType:'solid', fgColor:{rgb:'1A1A1A'}},
+                   alignment:{horizontal:'left', vertical:'center'} };
+      } else if (R === 1) {                // 메타
+        cell.s = { font:{name:FONT, sz:10, color:{rgb:'888888'}},
+                   fill:{patternType:'solid', fgColor:{rgb:'F2F2F2'}},
+                   alignment:{horizontal:'left', vertical:'center'} };
+      } else if (R === HROW) {             // 헤더
+        cell.s = { font:{name:FONT, sz:11, bold:true, color:{rgb:'FFFFFF'}},
+                   fill:{patternType:'solid', fgColor:{rgb:'333333'}},
+                   alignment:{horizontal:'center', vertical:'center', wrapText:true},
+                   border: BORDER };
+      } else {                             // 데이터
+        const ev = evs[R-HROW-1];
+        const zebra = ((R-HROW) % 2 === 0) ? 'FFFFFF' : 'F7F7F7';
+        if (HEADERS[C] === '카테고리') {   // 카테고리 셀: 색상 배지
+          cell.s = { font:{name:FONT, sz:10, bold:true, color:{rgb:'FFFFFF'}},
+                     fill:{patternType:'solid', fgColor:{rgb: CAT_HEX[ev.category] || '888888'}},
+                     alignment:{horizontal:'center', vertical:'center'},
+                     border: BORDER };
+        } else {
+          const center = (C<=2);          // ID·날짜·요일 가운데 정렬
+          cell.s = { font:{name:FONT, sz:10, color:{rgb:'222222'}},
+                     fill:{patternType:'solid', fgColor:{rgb: zebra}},
+                     alignment:{horizontal: center?'center':'left', vertical:'top', wrapText:true},
+                     border: BORDER };
+        }
+      }
+    }
+  }
+  // 헤더 행 자동필터
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({s:{r:HROW,c:0}, e:{r:range.e.r,c:nCols-1}}) };
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '이벤트');
   XLSX.writeFile(wb, `하이디라오_이벤트보고서_${today}.xlsx`);
   showToast('📊 엑셀 보고서가 다운로드됩니다');
 }
@@ -1996,6 +2065,6 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 2500);
 }
 </script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </body>
 </html>
