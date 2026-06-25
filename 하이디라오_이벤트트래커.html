@@ -1200,7 +1200,8 @@ body {
 <div class="toast" id="toast"></div>
 
 <!-- ===== DATA (separate file) ===== -->
-<script src="이벤트_데이터.js"></script>
+<!-- 캐시 무력화: 매 로드마다 최신 데이터를 받도록 ?v= 타임스탬프 부착 (document.write로 동기 실행 순서 유지) -->
+<script>document.write('<script src="이벤트_데이터.js?v=' + Date.now() + '"><\/script>');</script>
 
 <!-- ===== LOGIC ===== -->
 <script>
