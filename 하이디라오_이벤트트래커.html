@@ -1110,7 +1110,6 @@ body {
     </div>
     <div class="toolbar-btns">
       <button class="tbtn" id="btnSave">💾 저장</button>
-      <button class="tbtn" id="btnExport">📤 JSON</button>
       <button class="tbtn" id="btnExportExcel">📊 엑셀</button>
       <button class="tbtn primary" id="btnAdd">+ 추가</button>
     </div>
@@ -1918,7 +1917,6 @@ function setupListeners() {
   });
 
   // Export & Save
-  document.getElementById('btnExport').addEventListener('click', exportJSON);
   document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
   document.getElementById('btnSave').addEventListener('click', saveAllChanges);
 }
@@ -1951,20 +1949,6 @@ function saveEvent() {
 }
 
 // ===== EXPORT =====
-function exportJSON() {
-  const data = {
-    project: "하이디라오 영등포점",
-    exportDate: new Date().toISOString(),
-    totalEvents: EVENTS.length,
-    events: EVENTS.map(e => ({ ...e, categoryLabel: CAT_CONFIG[e.category]?.label || e.category }))
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url;
-  a.download = `하이디라오_이벤트_${new Date().toISOString().slice(0,10)}.json`;
-  a.click(); URL.revokeObjectURL(url);
-  showToast('📤 JSON 파일이 다운로드됩니다');
-}
 function exportExcel() {
   if (typeof XLSX === 'undefined') { showToast('⏳ 엑셀 라이브러리 로딩 중...'); return; }
   const wb = XLSX.utils.book_new();
