@@ -557,9 +557,37 @@ body {
   font-size: 13px;
 }
 
+/* Resizer (drag handle between list and detail) */
+.panel-resizer {
+  width: 6px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--border);
+  position: relative;
+  transition: background 0.15s;
+}
+.panel-resizer::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2px;
+  height: 28px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  opacity: 0.4;
+}
+.panel-resizer:hover,
+.panel-resizer.dragging { background: var(--accent); }
+.panel-resizer:hover::before,
+.panel-resizer.dragging::before { opacity: 0; }
+body.resizing-panels { cursor: col-resize; user-select: none; }
+
 /* Detail Panel (right) */
 .detail-panel {
   flex: 1;
+  min-width: 320px;
   overflow-y: auto;
   background: var(--bg-primary);
   padding: 0;
@@ -1048,13 +1076,15 @@ body {
   }
   
   .event-list-wrap {
-    width: 100%;
-    min-width: unset;
+    width: 100% !important;
+    min-width: unset !important;
     border-right: none;
     border-bottom: 1px solid var(--border);
     height: 400px; /* 리스트 영역을 적절한 높이로 고정 */
     flex-shrink: 0;
   }
+
+  .panel-resizer { display: none; } /* 모바일 세로 배치에서는 가로 리사이저 숨김 */
 
   .detail-panel {
     width: 100%;
@@ -1153,6 +1183,8 @@ body {
     </div>
     <div class="event-list" id="eventList"></div>
   </div>
+  <!-- Resizer (drag to resize) -->
+  <div class="panel-resizer" id="panelResizer" title="드래그하여 크기 조절"></div>
   <!-- Detail Panel (right) -->
   <div class="detail-panel" id="detailPanel">
     <div class="detail-empty" id="detailEmpty">
@@ -1237,6 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupListeners();
   setupDragScroll();
   setupResize();
+  setupPanelResize();
 });
 
 // ===== STORAGE =====
@@ -1845,6 +1878,58 @@ function setupResize() {
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     }
+  });
+}
+
+// 이벤트 목록 / 상세 창 가로 크기 조절 (드래그)
+function setupPanelResize() {
+  const resizer = document.getElementById('panelResizer');
+  const listWrap = document.querySelector('.event-list-wrap');
+  const bottomPanel = document.getElementById('bottomPanel');
+  if (!resizer || !listWrap || !bottomPanel) return;
+
+  const MIN_LIST = 360;   // 목록 최소 너비
+  const MIN_DETAIL = 320; // 상세 창 최소 너비
+  let isResizing = false, startX, startW;
+
+  // 저장된 너비 복원
+  const saved = parseInt(localStorage.getItem('haidilao_list_width'), 10);
+  if (saved && !isNaN(saved)) {
+    listWrap.style.width = saved + 'px';
+    listWrap.style.minWidth = MIN_LIST + 'px';
+  }
+
+  resizer.addEventListener('mousedown', (e) => {
+    isResizing = true;
+    startX = e.clientX;
+    startW = listWrap.offsetWidth;
+    resizer.classList.add('dragging');
+    document.body.classList.add('resizing-panels');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isResizing) return;
+    const dx = e.clientX - startX;
+    const maxW = bottomPanel.clientWidth - MIN_DETAIL - resizer.offsetWidth;
+    const newW = Math.max(MIN_LIST, Math.min(maxW, startW + dx));
+    listWrap.style.width = newW + 'px';
+    listWrap.style.minWidth = MIN_LIST + 'px';
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (!isResizing) return;
+    isResizing = false;
+    resizer.classList.remove('dragging');
+    document.body.classList.remove('resizing-panels');
+    localStorage.setItem('haidilao_list_width', String(listWrap.offsetWidth));
+  });
+
+  // 더블클릭 시 기본 너비로 초기화
+  resizer.addEventListener('dblclick', () => {
+    listWrap.style.width = '';
+    listWrap.style.minWidth = '';
+    localStorage.removeItem('haidilao_list_width');
   });
 }
 
