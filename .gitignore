@@ -6,3 +6,6 @@ lark_raw_messages.json
 .tempmediaStorage/
 browser/
 lark_refresh_token.txt
+
+# 시공 PDF 원본은 공개 저장소에 올리지 않음 (용량·개인정보)
+일일작업일보/

@@ -28,6 +28,15 @@ HTML = f"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>하이디라오 영등포점 — 시공 작업일지</title>
 <meta name="description" content="하이디라오 영등포점 공사 프로젝트 시공일지 대시보드. 공종별 인원 집계, 주별/월별 분석.">
+<!-- 홈 화면 추가(PWA): 갤럭시/아이폰에서 아이콘으로 실행 -->
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#c0652b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="작업일지">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -302,6 +311,22 @@ body {{
 .bar-fill::after {{ display:none; }}
 .bar-val {{ font-size:0.75rem; font-weight:600; color:var(--text-primary); width:32px; text-align:right; flex-shrink:0; }}
 
+/* ── 공종별 날짜 투입 그래프 모달 ── */
+.td-chart {{ max-height:60vh; overflow-y:auto; }}
+.td-row {{ padding:8px 4px; border-bottom:1px solid #f3f3f3; cursor:pointer; transition:background 0.12s; }}
+.td-row:last-child {{ border-bottom:none; }}
+.td-row:hover {{ background:var(--bg-secondary); }}
+.td-bar-line {{ display:flex; align-items:center; gap:10px; }}
+.td-date {{ font-size:0.78rem; color:var(--text-secondary); width:92px; flex-shrink:0; font-variant-numeric:tabular-nums; }}
+.td-date small {{ color:var(--text-muted); }}
+.td-cnt {{ font-size:0.82rem; font-weight:700; width:42px; text-align:right; flex-shrink:0; font-variant-numeric:tabular-nums; }}
+.td-works {{ margin:5px 0 0 102px; display:flex; flex-wrap:wrap; gap:5px; }}
+.td-work {{ font-size:0.74rem; color:var(--text-secondary); background:var(--bg-secondary); border:1px solid var(--border); border-radius:3px; padding:2px 7px; line-height:1.45; }}
+@media(max-width:768px) {{
+  .td-works {{ margin-left:0; }}
+  .td-date {{ width:78px; }}
+}}
+
 /* ── WEEKLY WORK SUMMARY ── */
 .week-summary {{ margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); }}
 .week-summary-title {{ font-size:0.74rem; font-weight:700; color:var(--text-secondary); margin-bottom:10px; letter-spacing:0.3px; }}
@@ -458,6 +483,7 @@ body {{
 }}
 .day-cell.missing {{ background:#ffebee; color:var(--red); border-color:#ffcdd2; }}
 .day-cell.empty {{ background:#fafafa; color:var(--text-muted); }}
+.day-cell.note {{ background:#fff7e6; color:var(--orange); border-color:#ffe0b2; cursor:help; }}
 
 /* ── CAT GRID ── */
 .cat-grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:0; margin-bottom:48px; border:1px solid var(--border); }}
@@ -466,9 +492,11 @@ body {{
   border-right:1px solid var(--border); border-bottom:1px solid var(--border);
   border-radius:0; padding:14px 16px;
   display:flex; align-items:center; gap:10px; transition:background 0.15s;
-  backdrop-filter:none;
+  backdrop-filter:none; cursor:pointer;
 }}
 .cat-chip:hover {{ background:var(--bg-card-hover); transform:none; box-shadow:none; }}
+.cat-chip .cat-go {{ font-size:0.7rem; color:var(--text-muted); opacity:0; transition:opacity 0.15s; flex-shrink:0; }}
+.cat-chip:hover .cat-go {{ opacity:1; }}
 .cat-dot {{ width:8px; height:8px; border-radius:50%; flex-shrink:0; box-shadow:none; }}
 .cat-name {{ font-size:0.82rem; font-weight:400; flex:1; color:var(--text-secondary); }}
 .cat-count {{ font-size:0.85rem; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; display:flex; flex-direction:column; align-items:flex-end; line-height:1.3; }}
@@ -527,7 +555,7 @@ body {{
           <tr>
             <th>날짜</th>
             <th>공종별 인원</th>
-            <th class="num" style="min-width:80px">작업자</th>
+            <th class="num" style="min-width:80px">총인원</th>
             <th class="num" style="min-width:60px">관리</th>
             <th style="min-width:70px">작업</th>
           </tr>
@@ -562,6 +590,11 @@ body {{
 <script>
 // ===== DATA =====
 const WORK_LOGS = {data_json};
+
+// ===== 작업일지 없는 날 (사유 표기) =====
+const NO_LOG_DAYS = {{
+  '2026-06-24': '바닥 콘크리트 타설 (작업일지 없음)',
+}};
 
 // ===== TRADE COLOR MAP =====
 const TRADE_COLORS = {{
@@ -678,7 +711,17 @@ function renderUpdateDate() {{
   const raw = (WORK_LOGS.last_updated || '').replace(/:\\d\\d\\s*KST$/, '').trim();
   el.textContent = raw ? '🕒 최근 업데이트: ' + raw : '';
 }}
+// 로컬 서버(맥)에서 열렸는지 여부 — 아니면 온라인(GitHub Pages) 보기
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname)
+  || /^192\.168\./.test(location.hostname) || /^10\./.test(location.hostname)
+  || location.protocol === 'file:';
+
 function init() {{
+  // 온라인 보기에서는 로컬 전용 '지금 업데이트' 버튼 숨김 (서버 없으면 동작 불가)
+  if (!IS_LOCAL) {{
+    const btn = document.getElementById('btnUpdate');
+    if (btn) btn.style.display = 'none';
+  }}
   renderUpdateDate();
   renderStats();
   renderCatGrid();
@@ -752,10 +795,11 @@ function renderCatGrid() {{
     .sort((a,b) => (days[b]||0) - (days[a]||0) || (heads[b]||0) - (heads[a]||0));
   document.getElementById('catGrid').innerHTML = shown.map(name => {{
     const c = TRADE_COLORS[name] || '#6366f1';
-    return `<div class="cat-chip">
+    return `<div class="cat-chip" onclick="openTradeModal('${{htmlEscape(name)}}')" title="${{htmlEscape(name)}} 날짜별 투입인원·작업내용 보기">
       <div class="cat-dot" style="background:${{c}}"></div>
       <span class="cat-name">${{name}}</span>
       <span class="cat-count" style="color:${{c}}">${{days[name]||0}}일<span class="cat-head">누적 ${{heads[name]||0}}명</span></span>
+      <span class="cat-go">›</span>
     </div>`;
   }}).join('');
 }}
@@ -788,8 +832,8 @@ function renderDailyTable() {{
         return `<span class="cat-tag" style="background:${{c}}22;color:${{c}};border:1px solid ${{c}}44">${{t}} <b>${{workers[t]}}명</b></span>`;
       }}).join('');
 
-    const laborBadge = labor > 0
-      ? `<span class="worker-total-big">${{labor}}명</span>`
+    const laborBadge = (labor + manager) > 0
+      ? `<span class="worker-total-big">${{labor + manager}}명</span>`
       : `<span style="color:var(--text-muted);font-size:0.78rem">-</span>`;
     const mgrBadge = manager > 0
       ? `<span class="manager-num">${{manager}}명</span>`
@@ -1136,6 +1180,12 @@ function togglePdf(pdfEnc) {{
   const box = document.getElementById('pdfPreview');
   if (!box) return;
   if (box.style.display === 'none' || !box.innerHTML) {{
+    if (!IS_LOCAL) {{
+      // 온라인(GitHub Pages)에는 PDF 원본을 올리지 않음
+      box.innerHTML = `<div style="padding:18px;font-size:0.85rem;color:var(--text-secondary)">📄 PDF 원본 미리보기는 맥(로컬 대시보드)에서만 제공됩니다. 작업 내용은 위 표에서 확인하세요.</div>`;
+      box.style.display = 'block';
+      return;
+    }}
     const url = '일일작업일보/' + pdfEnc;  // pdf_file은 encodeURIComponent 처리됨
     box.innerHTML = `<iframe src="${{url}}" class="pdf-frame"></iframe>
       <div class="pdf-bar"><a href="${{url}}" target="_blank" rel="noopener">↗ 새 탭에서 열기</a></div>`;
@@ -1172,6 +1222,67 @@ function saveWorkerModal(logDate) {{
   showToast('✅ 인원 저장 완료!');
 }}
 
+// ===== 공종별 날짜 투입인원 + 작업내용 그래프 모달 =====
+function openTradeModal(trade) {{
+  const color = TRADE_COLORS[trade] || '#6366f1';
+  // 해당 공종 인원이 있는 날짜만 수집 (날짜순)
+  const rows = [];
+  WORK_LOGS.logs.forEach(l => {{
+    const cnt = parseInt(getWorkers(l.log_date)[trade]) || 0;
+    if (cnt <= 0) return;
+    // 그 날짜 해당 공종 작업내용
+    const works = new Set();
+    Object.entries(l.trade_work_details || {{}}).forEach(([role, v]) => {{
+      if (v && tradeOf(role) === trade) {{
+        const w = cleanWork(v.work || v.work_cn);
+        if (w) works.add(w);
+      }}
+    }});
+    rows.push({{ date: l.log_date, cnt, works: [...works] }});
+  }});
+  rows.sort((a,b) => a.date.localeCompare(b.date));
+
+  const totalHead = rows.reduce((s,r) => s + r.cnt, 0);
+  const maxVal = 40;  // 인원수 기준 고정 최대값 (막대 길이 = 인원 / 40)
+  const avg = rows.length ? (totalHead / rows.length) : 0;
+
+  const chartRows = rows.map(r => {{
+    const d = new Date(r.date + 'T00:00:00');
+    const wd = WEEKDAYS[d.getDay()];
+    const pct = Math.round(r.cnt / maxVal * 100);
+    const worksHtml = r.works.length
+      ? `<div class="td-works">${{r.works.map(w => `<span class="td-work">${{htmlEscape(w)}}</span>`).join('')}}</div>`
+      : '';
+    return `<div class="td-row" onclick="closeModal();openWorkerModal('${{r.date}}')" title="${{r.date}} 상세 보기">
+      <div class="td-bar-line">
+        <span class="td-date">${{r.date.slice(5)}} <small>(${{wd}})</small></span>
+        <div class="bar-track"><div class="bar-fill" style="width:${{pct}}%;background:${{color}}"></div></div>
+        <span class="td-cnt" style="color:${{color}}">${{r.cnt}}명</span>
+      </div>
+      ${{worksHtml}}
+    </div>`;
+  }}).join('');
+
+  document.getElementById('modal').innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title"><span class="cat-dot" style="display:inline-block;background:${{color}}"></span> ${{htmlEscape(trade)}} · 날짜별 투입 현황</div>
+        <div style="color:var(--text-secondary);font-size:0.85rem;margin-top:4px">
+          투입 ${{rows.length}}일 · 누적 ${{totalHead}}명 · 일 평균 ${{avg.toFixed(1)}}명
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-section">
+      ${{rows.length ? `<div class="bar-chart td-chart">${{chartRows}}</div>`
+        : '<div class="work-item" style="color:var(--text-muted)">투입 기록이 없습니다.</div>'}}
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal()">닫기</button>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('active');
+}}
+
 function closeModal() {{
   document.getElementById('modalOverlay').classList.remove('active');
 }}
@@ -1201,12 +1312,13 @@ function renderCalendar() {{
     for (let d = 1; d <= daysInMonth; d++) {{
       const ds = `${{yr}}-${{String(mm).padStart(2,'0')}}-${{String(d).padStart(2,'0')}}`;
       const inLog = logDates.has(ds);
+      const note = NO_LOG_DAYS[ds];
       const dow = new Date(yr, mm-1, d).getDay();
       const workers = inLog ? getTotalWorkers(ds) : 0;
-      const cls = inLog ? 'has-log' : '';
-      const tooltip = inLog ? `${{ds}}${{workers > 0 ? ` (${{workers}}명)` : ''}}` : ds;
+      const cls = inLog ? 'has-log' : (note ? 'note' : '');
+      const tooltip = inLog ? `${{ds}}${{workers > 0 ? ` (${{workers}}명)` : ''}}` : (note ? `${{ds}} · ${{note}}` : ds);
       cells.push(`<div class="day-cell ${{cls}}" title="${{tooltip}}" onclick="${{inLog ? `openWorkerModal('${{ds}}')` : ''}}">
-        ${{d}}${{workers > 0 ? `<sup style="font-size:0.5rem;color:var(--green)">●</sup>` : ''}}
+        ${{d}}${{workers > 0 ? `<sup style="font-size:0.5rem;color:var(--green)">●</sup>` : (note ? `<sup style="font-size:0.5rem;color:var(--orange)">◆</sup>` : '')}}
       </div>`);
     }}
     html += `<div class="month-group">
@@ -1229,7 +1341,7 @@ function renderMissing() {{
   while (d <= end) {{
     const ds = d.toISOString().slice(0,10);
     const dow = d.getDay();
-    if (dow !== 0 && dow !== 6 && !logDates.has(ds)) missing.push(ds);
+    if (dow !== 0 && dow !== 6 && !logDates.has(ds) && !NO_LOG_DAYS[ds]) missing.push(ds);
     d.setDate(d.getDate()+1);
   }}
   if (missing.length === 0) {{ document.getElementById('missingSection').innerHTML = ''; return; }}
