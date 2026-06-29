@@ -340,7 +340,10 @@ def update_html(data):
     with open(HTML_FILE, encoding='utf-8') as f:
         html = f.read()
 
-    js_data = json.dumps(data, ensure_ascii=False)
+    # 작업내용 중국어 → 한국어 변환 (HTML용, 원본 data/JSON은 중국어 유지)
+    from work_i18n import translate_data_for_html
+    data_html = translate_data_for_html(data, BASE_DIR)
+    js_data = json.dumps(data_html, ensure_ascii=False)
     # 줄바꿈/특수문자 이스케이프
     js_data = js_data.replace('\r\n', '\\n').replace('\r', '\\n').replace('\n', '\\n')
 
