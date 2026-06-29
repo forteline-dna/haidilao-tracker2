@@ -30,6 +30,13 @@ class Handler(SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass  # 접속 로그 숨김 (조용히)
 
+    def end_headers(self):
+        # 항상 최신 화면이 뜨도록 캐시 방지 헤더 주입
+        self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        super().end_headers()
+
     def do_POST(self):
         if self.path.rstrip('/') == '/api/update':
             self._run_update()
