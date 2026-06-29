@@ -99,7 +99,15 @@ body {{
 .btn-save {{ background:var(--accent); color:white; border-color:var(--accent); }}
 .btn-save:hover {{ background:#333; border-color:#333; color:white; filter:none; }}
 .btn-excel {{ background:var(--bg-secondary); color:var(--text-primary); }}
-.btn-json {{ background:var(--bg-secondary); color:var(--text-secondary); }}
+.btn-update {{ background:#1A7A4A; color:white; border-color:#1A7A4A; }}
+.btn-update:hover {{ background:#15633c; border-color:#15633c; color:white; }}
+.btn-update.loading {{ opacity:0.75; cursor:progress; pointer-events:none; }}
+.btn-update.loading::before {{
+  content:""; width:12px; height:12px; border:2px solid rgba(255,255,255,0.4);
+  border-top-color:#fff; border-radius:50%; display:inline-block;
+  animation:spin 0.7s linear infinite;
+}}
+@keyframes spin {{ to {{ transform:rotate(360deg); }} }}
 
 /* ── STATS ── */
 .stats-row {{
@@ -426,11 +434,10 @@ body {{
   <div class="header fade-in">
     <h1>📋 하이디라오 영등포점 시공 작업일지</h1>
     <p>海底捞韩国永登浦店 施工日志 Dashboard — 공종별 인원 집계</p>
-    <span class="badge">🤖 Lark 시공그룹 채팅 자동 수집</span>
     <div class="action-bar">
+      <button class="action-btn btn-update" id="btnUpdate" onclick="runUpdate()">🔄 Lark 채팅 수집 · 지금 업데이트</button>
       <button class="action-btn btn-save" id="btnSave" onclick="saveChanges()">💾 저장</button>
       <button class="action-btn btn-excel" onclick="exportExcel()">📊 엑셀 보고서</button>
-      <button class="action-btn btn-json" onclick="exportJSON()">📤 JSON</button>
     </div>
   </div>
 
@@ -491,6 +498,7 @@ body {{
 </div>
 <div class="toast-wl" id="toastWL"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script>
 // ===== DATA =====
 const WORK_LOGS = {data_json};
@@ -987,56 +995,127 @@ function saveChanges() {{
   document.getElementById('btnSave').classList.remove('has-changes');
 }}
 
-function exportExcel() {{
-  const allTrades = getAllTrades();
-  let csv = 'BOM,\\uFF2C\\uFF2F\\uFF27 날짜,총 인원,' + allTrades.join(',') + '\\n';
-  WORK_LOGS.logs.forEach(l => {{
-    const workers = getWorkers(l.log_date);
-    const total = getTotalWorkers(l.log_date);
-    const tradeCols = allTrades.map(t => workers[t] || 0);
-    csv += `"${{l.file_name}}",${{l.log_date}},${{total}},${{tradeCols.join(',')}}\\n`;
-  }});
-  // Add weekly summary
-  csv += '\\n[주별 집계]\\n주 시작일,주 종료일,총 인원,' + allTrades.join(',') + '\\n';
-  const weeks = {{}};
-  WORK_LOGS.logs.forEach(l => {{
-    const d = new Date(l.log_date);
-    const mon = new Date(d); mon.setDate(d.getDate() - ((d.getDay()+6)%7));
-    const wk = mon.toISOString().slice(0,10);
-    if (!weeks[wk]) weeks[wk] = [];
-    weeks[wk].push(l);
-  }});
-  Object.keys(weeks).sort().forEach(wk => {{
-    const wkEnd = new Date(wk); wkEnd.setDate(wkEnd.getDate()+6);
-    const tradeTotals = {{}};
-    let gt = 0;
-    weeks[wk].forEach(l => {{
-      const w = getWorkers(l.log_date);
-      allTrades.forEach(t => {{
-        tradeTotals[t] = (tradeTotals[t]||0) + (parseInt(w[t])||0);
-        gt += (parseInt(w[t])||0);
-      }});
-    }});
-    csv += `${{wk}},${{wkEnd.toISOString().slice(0,10)}},${{gt}},${{allTrades.map(t=>tradeTotals[t]||0).join(',')}}\\n`;
-  }});
-
-  const blob = new Blob(['\\uFEFF'+csv], {{type:'text/csv;charset=utf-8;'}});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '하이디라오_인원집계_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  showToast('📊 CSV 다운로드 시작!');
+// ===== 수동 업데이트 (로컬 서버 필요) =====
+async function runUpdate() {{
+  const btn = document.getElementById('btnUpdate');
+  if (btn.classList.contains('loading')) return;
+  const orig = btn.innerHTML;
+  btn.classList.add('loading');
+  btn.innerHTML = '업데이트 중… (최대 1~2분)';
+  try {{
+    const res = await fetch('/api/update', {{ method:'POST' }});
+    if (!res.ok) throw new Error('server');
+    const data = await res.json();
+    if (data.ok) {{
+      const parts = [];
+      if (data.work_logs) parts.push(`시공일지 +${{data.work_logs}}`);
+      if (data.events) parts.push(`이벤트 +${{data.events}}`);
+      showToast('✅ 업데이트 완료! ' + (parts.length ? parts.join(', ') : '새 항목 없음') + ' · 새로고침합니다');
+      setTimeout(() => location.reload(), 1600);
+    }} else {{
+      showToast('⚠️ 업데이트 실패: ' + (data.error || '알 수 없음'));
+      btn.classList.remove('loading'); btn.innerHTML = orig;
+    }}
+  }} catch (e) {{
+    alert('수동 업데이트 버튼은 로컬 서버에서만 동작합니다.\\n\\n프로젝트 폴더의 "대시보드_시작.command" 파일을 더블클릭해 실행한 뒤,\\n자동으로 열리는 페이지에서 다시 눌러주세요.\\n\\n(또는 터미널에서:  python3 daily_update.py )');
+    btn.classList.remove('loading'); btn.innerHTML = orig;
+  }}
 }}
 
-function exportJSON() {{
-  const wd = getWorkerData();
-  const exportData = {{...WORK_LOGS, workerData: wd, exportedAt: new Date().toISOString()}};
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], {{type:'application/json'}});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '하이디라오_작업일지_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  showToast('📤 JSON 다운로드!');
+// ===== 스타일 적용 엑셀(.xlsx) 내보내기 =====
+function exportExcel() {{
+  if (typeof XLSX === 'undefined') {{ showToast('⏳ 엑셀 라이브러리 로딩 중… 잠시 후 다시 시도하세요'); return; }}
+  const today = new Date().toISOString().slice(0,10);
+  const FONT = '맑은 고딕';
+  const WD = ['일','월','화','수','목','금','토'];
+  const trades = getAllTrades();
+  const logs = [...WORK_LOGS.logs].sort((a,b) => a.log_date.localeCompare(b.log_date));
+
+  // 공통: 제목/메타/헤더/데이터 행에 스타일 입힌 시트 생성
+  function styleSheet(title, meta, headers, rows, opts) {{
+    opts = opts || {{}};
+    const blank = Array(headers.length-1).fill('');
+    const aoa = [ [title, ...blank], [meta, ...blank], headers, ...rows ];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const HROW = 2;
+    ws['!merges'] = [
+      {{s:{{r:0,c:0}}, e:{{r:0,c:headers.length-1}}}},
+      {{s:{{r:1,c:0}}, e:{{r:1,c:headers.length-1}}}},
+    ];
+    ws['!rows'] = [{{hpt:30}},{{hpt:20}},{{hpt:24}}];
+    const bd = {{ style:'thin', color:{{rgb:'D9D9D9'}} }};
+    const BORDER = {{ top:bd, bottom:bd, left:bd, right:bd }};
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R=range.s.r; R<=range.e.r; R++) {{
+      for (let C=range.s.c; C<=range.e.c; C++) {{
+        const addr = XLSX.utils.encode_cell({{r:R,c:C}});
+        const cell = ws[addr] || (ws[addr] = {{t:'s', v:''}});
+        if (R === 0) {{
+          cell.s = {{ font:{{name:FONT, sz:16, bold:true, color:{{rgb:'FFFFFF'}}}},
+                     fill:{{patternType:'solid', fgColor:{{rgb:'1A1A1A'}}}},
+                     alignment:{{horizontal:'left', vertical:'center'}} }};
+        }} else if (R === 1) {{
+          cell.s = {{ font:{{name:FONT, sz:10, color:{{rgb:'888888'}}}},
+                     fill:{{patternType:'solid', fgColor:{{rgb:'F2F2F2'}}}},
+                     alignment:{{horizontal:'left', vertical:'center'}} }};
+        }} else if (R === HROW) {{
+          cell.s = {{ font:{{name:FONT, sz:11, bold:true, color:{{rgb:'FFFFFF'}}}},
+                     fill:{{patternType:'solid', fgColor:{{rgb:'333333'}}}},
+                     alignment:{{horizontal:'center', vertical:'center', wrapText:true}},
+                     border:BORDER }};
+        }} else {{
+          const isTotal = opts.totalRow && R === range.e.r;
+          const zebra = ((R-HROW) % 2 === 0) ? 'FFFFFF' : 'F7F7F7';
+          cell.s = {{ font:{{name:FONT, sz:10, bold:(C===2 || isTotal), color:{{rgb: isTotal?'FFFFFF':'222222'}}}},
+                     fill:{{patternType:'solid', fgColor:{{rgb: isTotal?'555555':zebra}}}},
+                     alignment:{{horizontal:'center', vertical:'center'}},
+                     border:BORDER }};
+        }}
+      }}
+    }}
+    ws['!autofilter'] = {{ ref: XLSX.utils.encode_range({{s:{{r:HROW,c:0}}, e:{{r:range.e.r,c:headers.length-1}}}}) }};
+    return ws;
+  }}
+
+  // ── 일별 시트 ──
+  const H = ['날짜','요일','총 인원', ...trades];
+  const dailyRows = logs.map(l => {{
+    const w = getWorkers(l.log_date);
+    return [ l.log_date, WD[new Date(l.log_date+'T00:00:00').getDay()], getTotalWorkers(l.log_date),
+             ...trades.map(t => parseInt(w[t])||0) ];
+  }});
+  const totalRow = ['합계','', dailyRows.reduce((a,r)=>a+r[2],0),
+                    ...trades.map((t,i)=> dailyRows.reduce((a,r)=>a+r[3+i],0))];
+  const wsDaily = styleSheet('하이디라오 영등포점 · 일별 인원집계',
+    `내보낸 날짜 ${{today}}   ·   총 ${{logs.length}}일   ·   기간 ${{WORK_LOGS.period||''}}`,
+    H, [...dailyRows, totalRow], {{totalRow:true}});
+  wsDaily['!cols'] = H.map((h,i)=> i===0?{{wch:13}} : i===1?{{wch:6}} : i===2?{{wch:9}} : {{wch:11}});
+
+  // ── 주별 시트 ──
+  const weeks = {{}};
+  logs.forEach(l => {{
+    const d = new Date(l.log_date+'T00:00:00');
+    const mon = new Date(d); mon.setDate(d.getDate() - ((d.getDay()+6)%7));
+    const wk = mon.toISOString().slice(0,10);
+    (weeks[wk] = weeks[wk] || []).push(l);
+  }});
+  const WH = ['주간','일수','총 인원', ...trades];
+  const weekRows = Object.keys(weeks).sort().map(wk => {{
+    const wkEnd = new Date(wk+'T00:00:00'); wkEnd.setDate(wkEnd.getDate()+6);
+    const tt = {{}}; let gt = 0;
+    weeks[wk].forEach(l => {{ const w = getWorkers(l.log_date);
+      trades.forEach(t => {{ const v = parseInt(w[t])||0; tt[t]=(tt[t]||0)+v; gt+=v; }}); }});
+    return [ `${{wk}} ~ ${{wkEnd.toISOString().slice(0,10)}}`, weeks[wk].length, gt, ...trades.map(t=>tt[t]||0) ];
+  }});
+  const wsWeek = styleSheet('하이디라오 영등포점 · 주별 인원집계',
+    `내보낸 날짜 ${{today}}   ·   총 ${{weekRows.length}}주`, WH, weekRows, {{}});
+  wsWeek['!cols'] = WH.map((h,i)=> i===0?{{wch:26}} : i===1?{{wch:7}} : i===2?{{wch:9}} : {{wch:11}});
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, wsDaily, '일별');
+  XLSX.utils.book_append_sheet(wb, wsWeek, '주별');
+  XLSX.writeFile(wb, `하이디라오_인원집계_${{today}}.xlsx`);
+  showToast('📊 엑셀 보고서가 다운로드됩니다');
 }}
 
 function showToast(msg) {{
