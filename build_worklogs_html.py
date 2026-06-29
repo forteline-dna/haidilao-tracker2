@@ -12,6 +12,10 @@ HTML_FILE = os.path.join(BASE_DIR, '하이디라오_작업일지.html')
 with open(DATA_FILE, 'r', encoding='utf-8') as f:
     data = json.load(f)
 
+# ── 작업내용 중국어 → 한국어 변환 (빌드 시점, 원본 JSON은 보존) ──
+from work_i18n import translate_data_for_html
+data = translate_data_for_html(data, BASE_DIR)
+
 data_json = json.dumps(data, ensure_ascii=False)
 
 HTML = f"""<!DOCTYPE html>
@@ -232,7 +236,12 @@ body {{
 .log-table tbody tr:last-child {{ border-bottom:none; }}
 .log-table td {{ padding:11px 16px; font-size:0.82rem; vertical-align:middle; }}
 .date-cell {{ font-weight:600; white-space:nowrap; font-variant-numeric:tabular-nums; }}
+.date-cell.sat {{ color:#2563eb; }}
+.date-cell.sun {{ color:#dc2626; }}
+.date-cell.sat .weekday {{ color:#2563eb; }}
+.date-cell.sun .weekday {{ color:#dc2626; }}
 .weekday {{ font-size:0.7rem; color:var(--text-muted); margin-left:4px; }}
+.manager-num {{ font-size:0.92rem; font-weight:700; color:var(--text-muted); }}
 .cat-tags {{ display:flex; flex-wrap:wrap; gap:4px; }}
 .cat-tag {{
   display:inline-block; padding:2px 8px; border-radius:2px;
@@ -293,6 +302,20 @@ body {{
 .bar-fill::after {{ display:none; }}
 .bar-val {{ font-size:0.75rem; font-weight:600; color:var(--text-primary); width:32px; text-align:right; flex-shrink:0; }}
 
+/* ── WEEKLY WORK SUMMARY ── */
+.week-summary {{ margin-top:16px; padding-top:14px; border-top:1px dashed var(--border); }}
+.week-summary-title {{ font-size:0.74rem; font-weight:700; color:var(--text-secondary); margin-bottom:10px; letter-spacing:0.3px; }}
+.ws-row {{ display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid #f3f3f3; font-size:0.8rem; }}
+.ws-row:last-of-type {{ border-bottom:none; }}
+.ws-dot {{ width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px; }}
+.ws-trade {{ width:120px; flex-shrink:0; font-weight:600; color:var(--text-primary); }}
+.ws-work {{ flex:1; color:var(--text-secondary); line-height:1.5; }}
+.ws-loc {{ margin-top:10px; font-size:0.76rem; color:var(--text-muted); }}
+@media(max-width:768px) {{
+  .ws-row {{ flex-wrap:wrap; }}
+  .ws-trade {{ width:auto; }}
+}}
+
 /* ── MODAL ── */
 .modal-overlay {{
   display:none; position:fixed; top:0; left:0; right:0; bottom:0;
@@ -346,6 +369,40 @@ body {{
   font-size:0.82rem; color:var(--text-secondary); padding:6px 0;
   border-bottom:1px solid #f0f0f0;
 }}
+/* 작업자/관리자 분리 배지 */
+.split-row {{ display:flex; gap:8px; margin-top:8px; }}
+.split-badge {{
+  flex:1; text-align:center; padding:8px 10px; border-radius:2px;
+  font-size:0.8rem; font-weight:600;
+}}
+.split-badge b {{ font-size:1.05rem; }}
+.split-badge.labor {{ background:#e8f5ee; color:var(--green); border:1px solid #c8e6d4; }}
+.split-badge.mgr {{ background:#f1f1f3; color:var(--text-secondary); border:1px solid var(--border); }}
+/* 관리·지원 구분 라벨 */
+.wi-group-label {{
+  grid-column:1/-1; margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);
+  font-size:0.7rem; font-weight:600; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:1px;
+}}
+/* 당일 작업 사항 */
+.work-item {{
+  font-size:0.82rem; color:var(--text-secondary); padding:6px 0;
+  border-bottom:1px solid #f0f0f0; display:flex; align-items:center; gap:6px;
+}}
+.work-item b {{ color:var(--text-primary); font-weight:600; }}
+.loc-row {{ margin-top:10px; font-size:0.78rem; color:var(--text-secondary); }}
+.loc-chip {{
+  display:inline-block; padding:2px 9px; margin:2px; border-radius:11px;
+  background:var(--bg-primary); border:1px solid var(--border); font-size:0.72rem;
+}}
+/* PDF 미리보기 */
+.pdf-link {{ cursor:pointer; color:var(--accent); text-decoration:underline; text-decoration-style:dotted; }}
+.pdf-link:hover {{ color:#000; }}
+.pdf-preview {{ margin:0 0 20px; border:1px solid var(--border); border-radius:4px; overflow:hidden; background:#f7f7f7; }}
+.pdf-frame {{ width:100%; height:560px; border:none; display:block; }}
+.pdf-bar {{ padding:8px 12px; text-align:right; border-top:1px solid var(--border); }}
+.pdf-bar a {{ font-size:0.75rem; color:var(--accent); text-decoration:none; }}
+.pdf-bar a:hover {{ text-decoration:underline; }}
 .modal-btn {{
   padding:9px 20px; border-radius:2px; font-size:0.82rem; font-weight:600;
   border:1px solid var(--border); cursor:pointer; transition:all 0.2s;
@@ -414,7 +471,8 @@ body {{
 .cat-chip:hover {{ background:var(--bg-card-hover); transform:none; box-shadow:none; }}
 .cat-dot {{ width:8px; height:8px; border-radius:50%; flex-shrink:0; box-shadow:none; }}
 .cat-name {{ font-size:0.82rem; font-weight:400; flex:1; color:var(--text-secondary); }}
-.cat-count {{ font-size:0.85rem; font-weight:700; font-variant-numeric:tabular-nums; }}
+.cat-count {{ font-size:0.85rem; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; display:flex; flex-direction:column; align-items:flex-end; line-height:1.3; }}
+.cat-head {{ font-size:0.66rem; font-weight:500; color:var(--text-muted); }}
 
 /* ── PROGRESS BAR (D-Day) ── */
 .progress-wrap {{ margin-top:8px; }}
@@ -468,9 +526,9 @@ body {{
         <thead>
           <tr>
             <th>날짜</th>
-            <th>공종별 작업 인원</th>
-            <th class="num" style="min-width:80px">총인원</th>
-            <th class="num">메시지</th>
+            <th>공종별 인원</th>
+            <th class="num" style="min-width:80px">작업자</th>
+            <th class="num" style="min-width:60px">관리</th>
             <th style="min-width:70px">작업</th>
           </tr>
         </thead>
@@ -511,6 +569,7 @@ const TRADE_COLORS = {{
   '가설공사': '#94a3b8',
   '먹매김·측량': '#14b8a6',
   '조적공사': '#f97316',
+  '금속공사': '#78716c',
   '소방·방화공사': '#dc2626',
   '급배수·위생공사': '#0ea5e9',
   'HVAC·기계설비공사': '#22c55e',
@@ -522,7 +581,41 @@ const TRADE_COLORS = {{
   '도면·설계변경': '#6366f1',
   '자재·발주': '#a855f7',
   '가구·FF&E': '#ec4899',
+  '현장반장': '#0d9488',
+  '관리인원': '#1e293b',
+  '번역': '#64748b',
 }};
+
+// 작업자 직종(인원) → 공종 매핑. 모든 화면을 공종 기준으로 통일한다.
+const ROLE_TO_TRADE = {{
+  '비계공': '가설공사', '보양공': '가설공사',
+  '철거공': '철거공사',
+  '조적공': '조적공사',
+  '방수공': '방수공사', '단열공': '방수공사',
+  '미장공': '미장/타일공사',
+  '목공': '목공사/천장공사', '경량철골공': '목공사/천장공사',
+  '금속': '금속공사',
+  '수도공': '급배수·위생공사',
+  '소방공': '소방·방화공사',
+  '전기공': '전기공사',
+  '냉난방공조공': 'HVAC·기계설비공사', '풍관(신풍·배풍)': 'HVAC·기계설비공사',
+  // 관리·지원 인력 (공종 아님)
+  '관리인원': '관리인원', '번역': '번역', '현장반장': '현장반장',
+}};
+
+// 공종 표시 순서 (공종 → 관리·지원 순). 새 공종이 나오면 뒤에 자동 추가됨.
+const TRADE_ORDER = [
+  '가설공사','철거공사','먹매김·측량','조적공사','금속공사','목공사/천장공사',
+  '방수공사','미장/타일공사','급배수·위생공사','전기공사','HVAC·기계설비공사',
+  '소방·방화공사','가스설비공사','자재·발주','도면·설계변경','가구·FF&E',
+  '현장반장','관리인원','번역',
+];
+// 관리·지원 인력 (공종별 시공 현황·태그에서 제외)
+const SUPPORT_TRADES = ['현장반장','관리인원','번역'];
+// 관리자(그레이) = 관리인원 + 번역. 나머지(현장반장 포함)는 작업자(녹색).
+const MANAGER_TRADES = ['관리인원','번역'];
+
+function tradeOf(k) {{ return ROLE_TO_TRADE[k] || k; }}
 
 const WEEKDAYS = ['일','월','화','수','목','금','토'];
 let currentFilter = 'all';
@@ -538,13 +631,23 @@ function getWorkerData() {{
 function saveWorkerData(data) {{
   localStorage.setItem('workerData_haidilao', JSON.stringify(data));
 }}
+// 직종/공종 혼재 딕셔너리를 공종 기준으로 합산 정규화
+function normalizeWorkers(dict) {{
+  const out = {{}};
+  if (!dict || typeof dict !== 'object') return out;
+  Object.entries(dict).forEach(([k, v]) => {{
+    const t = tradeOf(k);
+    out[t] = (out[t] || 0) + (parseInt(v) || 0);
+  }});
+  return out;
+}}
 function getWorkers(logDate) {{
   const wd = getWorkerData();
-  if (wd[logDate] && Object.keys(wd[logDate]).length > 0) return wd[logDate];
-  // fallback: JSON 데이터의 trades 필드에서 공종별 인원 가져오기
+  if (wd[logDate] && Object.keys(wd[logDate]).length > 0) return normalizeWorkers(wd[logDate]);
+  // fallback: JSON 데이터의 trades 필드(직종)를 공종으로 정규화
   const log = WORK_LOGS.logs.find(l => l.log_date === logDate);
   if (log && log.trades && typeof log.trades === 'object' && !Array.isArray(log.trades)) {{
-    return log.trades;
+    return normalizeWorkers(log.trades);
   }}
   return {{}};
 }}
@@ -557,6 +660,15 @@ function setWorkers(logDate, tradeWorkers) {{
 function getTotalWorkers(logDate) {{
   const w = getWorkers(logDate);
   return Object.values(w).reduce((a,b) => a + (parseInt(b)||0), 0);
+}}
+// 관리자(관리인원+번역) 합계
+function getManagerTotal(logDate) {{
+  const w = getWorkers(logDate);
+  return MANAGER_TRADES.reduce((a,t) => a + (parseInt(w[t])||0), 0);
+}}
+// 작업자 합계 (총원 - 관리자, 현장반장은 작업자에 포함)
+function getLaborTotal(logDate) {{
+  return getTotalWorkers(logDate) - getManagerTotal(logDate);
 }}
 
 // ===== INIT =====
@@ -582,7 +694,8 @@ function renderStats() {{
   const logs = WORK_LOGS.logs;
   const totalWorkers = logs.reduce((s, l) => s + getTotalWorkers(l.log_date), 0);
   const workedDays = logs.filter(l => getTotalWorkers(l.log_date) > 0).length;
-  const allTrades = new Set(logs.flatMap(l => Object.keys(l.trade_details || {{}})));
+  const allTrades = new Set(getPdfTrades().filter(t =>
+    WORK_LOGS.logs.some(l => (parseInt(getWorkers(l.log_date)[t]) || 0) > 0)));
   const avgWorkers = workedDays > 0 ? Math.round(totalWorkers / workedDays) : 0;
 
   const endDate = new Date('2026-08-16');
@@ -606,21 +719,45 @@ function renderStats() {{
     </div>`).join('');
 }}
 
-// ===== CAT GRID =====
-function renderCatGrid() {{
-  const tradeCounts = {{}};
+// PDF 시공일지 工种(직종)에서 나온 공종만. 새 직종이 PDF에 추가되면 자동 포함.
+function getPdfTrades() {{
+  const s = new Set();
   WORK_LOGS.logs.forEach(l => {{
-    Object.keys(l.trade_details || {{}}).forEach(t => {{
-      tradeCounts[t] = (tradeCounts[t] || 0) + 1;
+    if (l.trades && typeof l.trades === 'object' && !Array.isArray(l.trades)) {{
+      Object.keys(l.trades).forEach(r => {{
+        const t = tradeOf(r);
+        if (!SUPPORT_TRADES.includes(t)) s.add(t);
+      }});
+    }}
+  }});
+  const ordered = TRADE_ORDER.filter(t => s.has(t));
+  [...s].forEach(t => {{ if (!ordered.includes(t)) ordered.push(t); }});
+  return ordered;
+}}
+
+// ===== CAT GRID (공종별 시공 현황: PDF 工种 기준, 공종별 날짜 / 누적 인원) =====
+function renderCatGrid() {{
+  const trades = getPdfTrades();
+  const days = {{}}, heads = {{}};
+  WORK_LOGS.logs.forEach(l => {{
+    const w = getWorkers(l.log_date);
+    trades.forEach(t => {{
+      const cnt = parseInt(w[t]) || 0;
+      if (cnt > 0) days[t] = (days[t] || 0) + 1;
+      heads[t] = (heads[t] || 0) + cnt;
     }});
   }});
-  const sorted = Object.entries(tradeCounts).sort((a,b) => b[1]-a[1]);
-  document.getElementById('catGrid').innerHTML = sorted.map(([name, cnt]) => `
-    <div class="cat-chip">
-      <div class="cat-dot" style="background:${{TRADE_COLORS[name] || '#6366f1'}}"></div>
+  const shown = trades
+    .filter(t => (heads[t] || 0) > 0)
+    .sort((a,b) => (days[b]||0) - (days[a]||0) || (heads[b]||0) - (heads[a]||0));
+  document.getElementById('catGrid').innerHTML = shown.map(name => {{
+    const c = TRADE_COLORS[name] || '#6366f1';
+    return `<div class="cat-chip">
+      <div class="cat-dot" style="background:${{c}}"></div>
       <span class="cat-name">${{name}}</span>
-      <span class="cat-count" style="color:${{TRADE_COLORS[name] || '#6366f1'}}">${{cnt}}일</span>
-    </div>`).join('');
+      <span class="cat-count" style="color:${{c}}">${{days[name]||0}}일<span class="cat-head">누적 ${{heads[name]||0}}명</span></span>
+    </div>`;
+  }}).join('');
 }}
 
 // ===== DAILY TABLE =====
@@ -635,29 +772,35 @@ function renderDailyTable() {{
   );
 
   document.getElementById('dailyTableBody').innerHTML = logs.map(l => {{
-    const d = new Date(l.log_date);
-    const wd = WEEKDAYS[d.getDay()];
+    const d = new Date(l.log_date + 'T00:00:00');
+    const dow = d.getDay();
+    const wd = WEEKDAYS[dow];
+    const dayClass = dow === 0 ? ' sun' : dow === 6 ? ' sat' : '';
     const workers = getWorkers(l.log_date);
-    const total = getTotalWorkers(l.log_date);
-    const trades = Object.keys(l.trade_details || {{}});
+    const labor = getLaborTotal(l.log_date);
+    const manager = getManagerTotal(l.log_date);
 
-    const tradeTags = trades.map(t => {{
-      const cnt = workers[t] || 0;
-      return `<span class="cat-tag" style="background:${{TRADE_COLORS[t]||'#6366f1'}}22;color:${{TRADE_COLORS[t]||'#6366f1'}};border:1px solid ${{TRADE_COLORS[t]||'#6366f1'}}44">
-        ${{t}}${{cnt > 0 ? ` <b>${{cnt}}명</b>` : ''}}
-      </span>`;
-    }}).join('');
+    // 공종별 인원만 표시 (관리·지원 제외, 인원 0 제외)
+    const tradeTags = getConstructionTrades()
+      .filter(t => (parseInt(workers[t]) || 0) > 0)
+      .map(t => {{
+        const c = TRADE_COLORS[t] || '#6366f1';
+        return `<span class="cat-tag" style="background:${{c}}22;color:${{c}};border:1px solid ${{c}}44">${{t}} <b>${{workers[t]}}명</b></span>`;
+      }}).join('');
 
-    const workerBadge = total > 0
-      ? `<span class="worker-total-big">${{total}}명</span>`
+    const laborBadge = labor > 0
+      ? `<span class="worker-total-big">${{labor}}명</span>`
+      : `<span style="color:var(--text-muted);font-size:0.78rem">-</span>`;
+    const mgrBadge = manager > 0
+      ? `<span class="manager-num">${{manager}}명</span>`
       : `<span style="color:var(--text-muted);font-size:0.78rem">-</span>`;
 
     return `<tr onclick="openWorkerModal('${{l.log_date}}')">
-      <td class="date-cell">${{l.log_date}}<span class="weekday">(${{wd}})</span></td>
+      <td class="date-cell${{dayClass}}">${{l.log_date}}<span class="weekday">(${{wd}})</span></td>
       <td><div class="cat-tags">${{tradeTags || '<span style="color:var(--text-muted);font-size:0.75rem">-</span>'}}</div></td>
-      <td class="num">${{workerBadge}}</td>
-      <td class="num" style="color:var(--text-muted)">${{l.total_messages || 0}}</td>
-      <td><button class="worker-badge${{total === 0 ? ' empty' : ''}}" onclick="event.stopPropagation();openWorkerModal('${{l.log_date}}')">
+      <td class="num">${{laborBadge}}</td>
+      <td class="num">${{mgrBadge}}</td>
+      <td><button class="worker-badge${{(labor+manager) === 0 ? ' empty' : ''}}" onclick="event.stopPropagation();openWorkerModal('${{l.log_date}}')">
         ✏️ 입력
       </button></td>
     </tr>`;
@@ -669,6 +812,27 @@ function setDailyFilter(f, btn) {{
   document.querySelectorAll('[data-f]').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderDailyTable();
+}}
+
+// 작업내용 문자열 정리 (제어문자·널바이트 제거, 공백 정리)
+function cleanWork(s) {{
+  return String(s == null ? '' : s).replace(/[\\u0000-\\u001f]/g, ' ').replace(/\\s+/g, ' ').trim();
+}}
+// 기간 내 로그들의 작업내용을 공종별로 묶어 중복 제거
+function buildWorkSummary(logs) {{
+  const byTrade = {{}}; const locs = new Set();
+  logs.forEach(l => {{
+    (l.locations || []).forEach(x => {{ const c = cleanWork(x); if (c) locs.add(c); }});
+    const twd = l.trade_work_details || {{}};
+    Object.entries(twd).forEach(([role, v]) => {{
+      if (!v) return;
+      const w = cleanWork(v.work || v.work_cn);
+      if (!w) return;
+      const t = tradeOf(role);
+      (byTrade[t] = byTrade[t] || new Set()).add(w);
+    }});
+  }});
+  return {{ byTrade, locs: [...locs] }};
 }}
 
 // ===== WEEKLY =====
@@ -701,6 +865,19 @@ function renderWeekly() {{
     const activeTrades = Object.keys(tradeTotals).filter(t => tradeTotals[t] > 0).sort((a,b) => tradeTotals[b] - tradeTotals[a]);
     const maxVal = Math.max(...Object.values(tradeTotals), 1);
 
+    const sum = buildWorkSummary(logs);
+    const sumTrades = getAllTrades().filter(t => sum.byTrade[t]);
+    const summaryHtml = sumTrades.length ? `
+      <div class="week-summary">
+        <div class="week-summary-title">📋 주간 작업 내용 요약</div>
+        ${{sumTrades.map(t => `<div class="ws-row">
+          <span class="ws-dot" style="background:${{TRADE_COLORS[t]||'#6366f1'}}"></span>
+          <span class="ws-trade">${{t}}</span>
+          <span class="ws-work">${{[...sum.byTrade[t]].map(htmlEscape).join(' · ')}}</span>
+        </div>`).join('')}}
+        ${{sum.locs.length ? `<div class="ws-loc">📍 작업 위치 ${{sum.locs.map(x => `<span class="loc-chip">${{htmlEscape(x)}}</span>`).join('')}}</div>` : ''}}
+      </div>` : '';
+
     html += `<div class="period-group">
       <div class="period-header">
         <div class="period-label">
@@ -728,6 +905,7 @@ function renderWeekly() {{
           <span style="font-size:0.78rem;color:var(--text-muted)">주 합계</span>
           <span style="font-size:1.1rem;font-weight:800;color:var(--accent)">${{grandTotal}}명</span>
         </div>` : ''}}
+        ${{summaryHtml}}
       </div>
     </div>`;
   }});
@@ -823,15 +1001,22 @@ function renderMonthly() {{
   document.getElementById('monthlyContent').innerHTML = html || '<p style="color:var(--text-muted);padding:20px">데이터가 없습니다.</p>';
 }}
 
+// 데이터에 등장하는 모든 공종을 정해진 순서대로 반환 (새 공종은 뒤에 자동 추가)
 function getAllTrades() {{
-  const s = new Set();
+  const s = new Set(TRADE_ORDER);
   WORK_LOGS.logs.forEach(l => {{
-    Object.keys(l.trade_details || {{}}).forEach(t => s.add(t));
+    Object.keys(l.trade_details || {{}}).forEach(t => s.add(tradeOf(t)));
     if (l.trades && typeof l.trades === 'object' && !Array.isArray(l.trades)) {{
-      Object.keys(l.trades).forEach(t => s.add(t));
+      Object.keys(l.trades).forEach(t => s.add(tradeOf(t)));
     }}
   }});
-  return [...s].sort();
+  const ordered = TRADE_ORDER.filter(t => s.has(t));
+  [...s].forEach(t => {{ if (!ordered.includes(t)) ordered.push(t); }});
+  return ordered;
+}}
+// 공종만 (관리·지원 인력 제외)
+function getConstructionTrades() {{
+  return getAllTrades().filter(t => !SUPPORT_TRADES.includes(t));
 }}
 
 // ===== TAB SWITCH =====
@@ -845,41 +1030,75 @@ function switchTab(tab) {{
 }}
 
 // ===== WORKER INPUT MODAL =====
+function htmlEscape(s) {{
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}}
+
 function openWorkerModal(logDate) {{
   const log = WORK_LOGS.logs.find(l => l.log_date === logDate);
   if (!log) return;
-  const d = new Date(logDate);
+  const d = new Date(logDate + 'T00:00:00');
   const wd = WEEKDAYS[d.getDay()];
   const workers = getWorkers(logDate);
-  const trades = Object.keys(log.trade_details || {{}});
   const allTrades = getAllTrades();
-  const shownTrades = [...new Set([...trades, ...Object.keys(workers).filter(t => workers[t] > 0)])];
+  const chatCats = new Set(Object.keys(log.trade_details || {{}}).map(tradeOf));
 
-  const inputRows = allTrades.map(t => {{
-    const isActive = shownTrades.includes(t) || trades.includes(t);
+  // 공종 입력칸 (공종 → 관리·지원 순, 사이에 구분 라벨)
+  let supportStarted = false;
+  const inputRows = allTrades.map((t, i) => {{
+    let pre = '';
+    if (!supportStarted && SUPPORT_TRADES.includes(t)) {{
+      supportStarted = true;
+      pre = `<div class="wi-group-label">관리·지원 인력</div>`;
+    }}
+    const isActive = (parseInt(workers[t]) || 0) > 0 || chatCats.has(t);
     const color = TRADE_COLORS[t] || '#6366f1';
-    return `<div class="worker-input-row" style="${{!isActive ? 'opacity:0.5' : ''}}">
+    return `${{pre}}<div class="worker-input-row" style="${{!isActive ? 'opacity:0.45' : ''}}">
       <span class="trade-dot" style="background:${{color}}"></span>
       <span class="worker-input-label">${{t}}</span>
-      <input type="number" min="0" max="999" class="wi-number" id="wi_${{t.replace(/[^a-z가-힣]/gi,'_')}}"
-        value="${{workers[t] || 0}}" oninput="updateModalTotal()"
-        placeholder="0" ${{!isActive ? 'style="opacity:0.6"' : ''}}>
+      <input type="number" min="0" max="999" class="wi-number" id="wi_${{i}}" data-trade="${{htmlEscape(t)}}"
+        value="${{parseInt(workers[t]) || 0}}" oninput="updateModalTotal()" placeholder="0">
     </div>`;
   }});
 
-  const total = Object.values(workers).reduce((a,b) => a + (parseInt(b)||0), 0);
+  const total = getTotalWorkers(logDate);
+  const labor = getLaborTotal(logDate);
+  const manager = getManagerTotal(logDate);
 
-  const highlights = (log.day_highlights_kr || log.day_highlights || []).slice(0,4);
+  // 그날 작업 사항 (직종별 작업내용 → 없으면 work_contents)
+  const twd = log.trade_work_details || {{}};
+  let workRows = Object.entries(twd)
+    .filter(([k,v]) => v && (v.work || v.work_cn))
+    .map(([k,v]) => {{
+      const t = tradeOf(k);
+      const color = TRADE_COLORS[t] || '#6366f1';
+      return `<div class="work-item"><span class="trade-dot" style="background:${{color}}"></span><b>${{htmlEscape(t)}}</b> ${{htmlEscape(v.work || v.work_cn)}}</div>`;
+    }}).join('');
+  if (!workRows) {{
+    workRows = (log.work_contents || []).filter(Boolean)
+      .map(w => `<div class="work-item">• ${{htmlEscape(w)}}</div>`).join('');
+  }}
+  const locs = (log.locations || []).filter(Boolean);
+  const locHtml = locs.length ? `<div class="loc-row">📍 ${{locs.map(x => `<span class="loc-chip">${{htmlEscape(x)}}</span>`).join('')}}</div>` : '';
+
+  // 이슈 / 주요 대화
+  const issues = (log.day_highlights_kr || log.day_highlights || []).slice(0,5);
 
   document.getElementById('modal').innerHTML = `
     <div class="modal-header">
       <div>
         <div class="modal-title">👷 작업 인원 입력</div>
         <div style="color:var(--text-secondary);font-size:0.85rem;margin-top:4px">
-          ${{logDate}} (${{wd}}) — ${{log.file_name || ''}}</div>
+          ${{logDate}} (${{wd}})
+          ${{log.pdf_file ? ` · <span class="pdf-link" onclick="togglePdf('${{encodeURIComponent(log.pdf_file)}}')">📄 ${{htmlEscape(log.file_name || log.pdf_file)}} (미리보기)</span>` : (log.file_name ? ` — ${{htmlEscape(log.file_name)}}` : '')}}
+        </div>
       </div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
+
+    <div class="pdf-preview" id="pdfPreview" style="display:none"></div>
 
     <div class="modal-section">
       <div class="modal-section-title">공종별 투입 인원 (명)</div>
@@ -888,11 +1107,21 @@ function openWorkerModal(logDate) {{
         <span class="label">📊 당일 총 투입 인원</span>
         <span class="value" id="modalTotal">${{total}}명</span>
       </div>
+      <div class="split-row">
+        <span class="split-badge labor">작업자 <b id="modalLabor">${{labor}}</b>명</span>
+        <span class="split-badge mgr">관리자 <b id="modalManager">${{manager}}</b>명</span>
+      </div>
     </div>
 
-    ${{highlights.length > 0 ? `<div class="modal-section">
-      <div class="modal-section-title">📝 당일 주요 대화</div>
-      ${{highlights.map(h => `<div class="modal-highlight">${{h.slice(0,120)}}</div>`).join('')}}
+    <div class="modal-section">
+      <div class="modal-section-title">📋 당일 작업 사항</div>
+      ${{workRows || '<div class="work-item" style="color:var(--text-muted)">기록 없음</div>'}}
+      ${{locHtml}}
+    </div>
+
+    ${{issues.length > 0 ? `<div class="modal-section">
+      <div class="modal-section-title">⚠️ 이슈 / 주요 대화</div>
+      ${{issues.map(h => `<div class="modal-highlight">${{htmlEscape(h).slice(0,160)}}</div>`).join('')}}
     </div>` : ''}}
 
     <div class="modal-footer">
@@ -903,28 +1132,43 @@ function openWorkerModal(logDate) {{
   document.getElementById('modalOverlay').classList.add('active');
 }}
 
+function togglePdf(pdfEnc) {{
+  const box = document.getElementById('pdfPreview');
+  if (!box) return;
+  if (box.style.display === 'none' || !box.innerHTML) {{
+    const url = '일일작업일보/' + pdfEnc;  // pdf_file은 encodeURIComponent 처리됨
+    box.innerHTML = `<iframe src="${{url}}" class="pdf-frame"></iframe>
+      <div class="pdf-bar"><a href="${{url}}" target="_blank" rel="noopener">↗ 새 탭에서 열기</a></div>`;
+    box.style.display = 'block';
+  }} else {{
+    box.style.display = 'none';
+    box.innerHTML = '';
+  }}
+}}
+
 function updateModalTotal() {{
-  const inputs = document.querySelectorAll('.wi-number');
-  let total = 0;
-  inputs.forEach(inp => total += parseInt(inp.value) || 0);
+  let total = 0, manager = 0;
+  document.querySelectorAll('.wi-number').forEach(inp => {{
+    const v = parseInt(inp.value) || 0;
+    total += v;
+    if (MANAGER_TRADES.includes(inp.dataset.trade)) manager += v;
+  }});
   document.getElementById('modalTotal').textContent = total + '명';
+  const lb = document.getElementById('modalLabor'); if (lb) lb.textContent = (total - manager);
+  const mg = document.getElementById('modalManager'); if (mg) mg.textContent = manager;
 }}
 
 function saveWorkerModal(logDate) {{
-  const allTrades = getAllTrades();
   const workers = {{}};
-  allTrades.forEach(t => {{
-    const id = 'wi_' + t.replace(/[^a-z가-힣]/gi,'_');
-    const el = document.getElementById(id);
-    if (el) {{
-      const v = parseInt(el.value) || 0;
-      if (v > 0) workers[t] = v;
-    }}
+  document.querySelectorAll('.wi-number').forEach(inp => {{
+    const v = parseInt(inp.value) || 0;
+    if (v > 0) workers[inp.dataset.trade] = v;
   }});
   setWorkers(logDate, workers);
   closeModal();
   renderDailyTable();
   renderStats();
+  renderCatGrid();
   showToast('✅ 인원 저장 완료!');
 }}
 
