@@ -80,9 +80,8 @@ body {
   box-shadow:none; text-transform:uppercase; letter-spacing:0.5px;
 }
 .action-btn:hover { border-color:var(--accent); color:var(--accent); transform:none; box-shadow:none; }
-.btn-save { background:var(--accent); color:white; border-color:var(--accent); }
-.btn-save:hover { background:#333; border-color:#333; color:white; filter:none; }
 .btn-excel { background:var(--bg-secondary); color:var(--text-primary); }
+.update-date { display:inline-flex; align-items:center; font-size:0.74rem; color:var(--text-secondary); margin:0 4px; white-space:nowrap; }
 .btn-update { background:#1A7A4A; color:white; border-color:#1A7A4A; }
 .btn-update:hover { background:#15633c; border-color:#15633c; color:white; }
 .btn-update.loading { opacity:0.75; cursor:progress; pointer-events:none; }
@@ -420,7 +419,7 @@ body {
     <p>海底捞韩国永登浦店 施工日志 Dashboard — 공종별 인원 집계</p>
     <div class="action-bar">
       <button class="action-btn btn-update" id="btnUpdate" onclick="runUpdate()">🔄 Lark 채팅 수집 · 지금 업데이트</button>
-      <button class="action-btn btn-save" id="btnSave" onclick="saveChanges()">💾 저장</button>
+      <span class="update-date" id="updateDate"></span>
       <button class="action-btn btn-excel" onclick="exportExcel()">📊 엑셀 보고서</button>
     </div>
   </div>
@@ -535,7 +534,6 @@ function setWorkers(logDate, tradeWorkers) {
   wd[logDate] = tradeWorkers;
   saveWorkerData(wd);
   hasChanges = true;
-  document.getElementById('btnSave').classList.add('has-changes');
 }
 function getTotalWorkers(logDate) {
   const w = getWorkers(logDate);
@@ -543,7 +541,14 @@ function getTotalWorkers(logDate) {
 }
 
 // ===== INIT =====
+function renderUpdateDate() {
+  const el = document.getElementById('updateDate');
+  if (!el) return;
+  const raw = (WORK_LOGS.last_updated || '').replace(/:\d\d\s*KST$/, '').trim();
+  el.textContent = raw ? '🕒 최근 업데이트: ' + raw : '';
+}
 function init() {
+  renderUpdateDate();
   renderStats();
   renderCatGrid();
   renderDailyTable();
@@ -971,13 +976,6 @@ function renderMissing() {
 }
 
 // ===== SAVE / EXPORT =====
-function saveChanges() {
-  // Worker data is auto-saved to localStorage
-  // Optionally also export as JSON for backup
-  showToast('✅ 인원 데이터 저장됨 (브라우저 로컬 저장소)');
-  hasChanges = false;
-  document.getElementById('btnSave').classList.remove('has-changes');
-}
 
 // ===== 수동 업데이트 (로컬 서버 필요) =====
 async function runUpdate() {
