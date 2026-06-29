@@ -480,9 +480,20 @@ def main():
     log('── STEP 4: 공종별 작업자 파싱 + 고도화 ──')
     step_enrich()
 
+    # 이벤트 트래커 업데이트 (라크 채팅 → 채팅 이벤트)
+    log('')
+    log('── STEP 5: 이벤트 트래커 업데이트 ──')
+    evt_count = 0
+    try:
+        sys.path.insert(0, BASE_DIR)
+        from daily_update import update_event_tracker
+        evt_count = update_event_tracker(messages)
+    except Exception as e:
+        log(f'  ⚠️ 이벤트 트래커 업데이트 실패(건너뜀): {e}')
+
     # 회의록 문서 → meeting 이벤트 자동 추가
     log('')
-    log('── STEP 5: 회의록 자동 처리 ──')
+    log('── STEP 6: 회의록 자동 처리 ──')
     try:
         sys.path.insert(0, BASE_DIR)
         import meeting_minutes
@@ -497,6 +508,7 @@ def main():
     log(f'  ✅ 업데이트 완료! ({elapsed}초 소요)')
     log(f'     새 PDF 저장:   {pdf_count}개')
     log(f'     데이터 추가:   {data_count}개')
+    log(f'     이벤트 추가:   {evt_count}개')
     if token_expired:
         log('  ⚠️ 토큰 만료로 일부 PDF 미다운로드')
         log('     → python3 morning_update.py --token 으로 재실행')
