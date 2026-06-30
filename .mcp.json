@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "excel": {
+      "command": "uvx",
+      "args": ["excel-mcp-server", "stdio"],
+      "env": {
+        "EXCEL_FILES_PATH": "/home/user/haidilao-tracker2"
+      }
+    }
+  }
+}
