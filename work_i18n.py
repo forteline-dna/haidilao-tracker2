@@ -11,6 +11,7 @@
 import os
 import json
 import copy
+import unicodedata
 
 _BASE = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,12 +20,15 @@ def load_work_map(base_dir=None):
     p = os.path.join(base_dir or _BASE, 'work_translations.json')
     if os.path.exists(p):
         with open(p, 'r', encoding='utf-8') as f:
-            return json.load(f)
+            raw = json.load(f)
+        # 키를 NFC로 정규화 (PDF 추출 한글이 NFD인 경우 매칭되도록)
+        return {_norm(k): v for k, v in raw.items()}
     return {}
 
 
 def _norm(s):
-    return (s or '').replace('\x00', '').strip()
+    # 널바이트 제거 + 유니코드 NFC 정규화 (NFD 분해형 한글 매칭)
+    return unicodedata.normalize('NFC', (s or '').replace('\x00', '')).strip()
 
 
 def translate_data_for_html(data, base_dir=None):
