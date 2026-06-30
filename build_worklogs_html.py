@@ -807,7 +807,8 @@ function renderCatGrid() {{
 // ===== DAILY TABLE =====
 function renderDailyTable() {{
   const q = (document.getElementById('searchDaily')?.value || '').toLowerCase();
-  let logs = WORK_LOGS.logs;
+  // 최신 날짜가 위로 오도록 내림차순 정렬 (원본 배열은 보존)
+  let logs = WORK_LOGS.logs.slice().sort((a, b) => b.log_date.localeCompare(a.log_date));
   if (currentFilter === 'has-workers') logs = logs.filter(l => getTotalWorkers(l.log_date) > 0);
   if (currentFilter === 'no-workers') logs = logs.filter(l => getTotalWorkers(l.log_date) === 0);
   if (q) logs = logs.filter(l =>
