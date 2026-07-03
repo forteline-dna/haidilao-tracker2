@@ -22,7 +22,9 @@ SAVE_DIR   = os.path.join(BASE_DIR, '일일작업일보')
 DATA_FILE  = os.path.join(BASE_DIR, '작업일지_데이터.json')
 TOKEN_FILE = os.path.join(BASE_DIR, 'lark_user_token.txt')
 APP_ID     = 'cli_a97aa70eeca15e15'
-APP_SECRET = 'l37gyqepLXhdTjLW7L9UngWh5jV6jtQw'
+# 앱 시크릿은 공개 저장소 노출 방지를 위해 gitignore된 파일에서 로드
+with open(os.path.join(BASE_DIR, 'lark_app_secret.txt')) as _f:
+    APP_SECRET = _f.read().strip()
 DOMAIN     = 'https://open.larksuite.com'
 KST        = timezone(timedelta(hours=9))
 

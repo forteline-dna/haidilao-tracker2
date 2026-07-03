@@ -18,7 +18,9 @@ from collections import defaultdict
 # ── 설정 ──
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_ID = 'cli_a97aa70eeca15e15'
-APP_SECRET = 'l37gyqepLXhdTjLW7L9UngWh5jV6jtQw'
+# 앱 시크릿은 공개 저장소 노출 방지를 위해 gitignore된 파일에서 로드
+with open(os.path.join(BASE_DIR, 'lark_app_secret.txt')) as _f:
+    APP_SECRET = _f.read().strip()
 DOMAIN = 'https://open.larksuite.com'
 CHAT_ID = 'oc_943f27f012a4da28abb89083bc7095a3'
 KST = timezone(timedelta(hours=9))

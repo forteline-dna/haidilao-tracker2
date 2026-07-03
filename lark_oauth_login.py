@@ -7,6 +7,7 @@ Lark OAuth 로그인 & 채팅 데이터 수집 통합 스크립트
 
 import http.server
 import json
+import os
 import sys
 import webbrowser
 import threading
@@ -15,7 +16,9 @@ from urllib.request import Request, urlopen
 from urllib.parse import urlencode, urlparse, parse_qs
 
 APP_ID = "cli_a97aa70eeca15e15"
-APP_SECRET = "l37gyqepLXhdTjLW7L9UngWh5jV6jtQw"
+# 앱 시크릿은 공개 저장소 노출 방지를 위해 gitignore된 파일에서 로드
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "lark_app_secret.txt")) as _f:
+    APP_SECRET = _f.read().strip()
 DOMAIN = "https://open.larksuite.com"
 REDIRECT_URI = "http://localhost:9876/callback"
 PORT = 9876
