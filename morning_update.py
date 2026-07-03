@@ -504,6 +504,34 @@ def main():
     except Exception as e:
         log(f'  ⚠️ 회의록 처리 실패(건너뜀): {e}')
 
+    # 폰 화면(GitHub Pages) 자동 반영: 변경분 커밋 → push
+    log('')
+    log('── STEP 7: 폰 화면(GitHub Pages) 반영 ──')
+    try:
+        import subprocess
+        subprocess.run(['git', 'add', '-A'], cwd=BASE_DIR, check=True,
+                       capture_output=True, text=True)
+        # 스테이징된 변경이 있을 때만 커밋/푸시 (returncode 0 = 변경 없음)
+        no_change = subprocess.run(['git', 'diff', '--cached', '--quiet'],
+                                   cwd=BASE_DIR).returncode == 0
+        if no_change:
+            log('  ℹ️ 변경 없음 → push 생략')
+        else:
+            today = datetime.now(KST).strftime('%Y-%m-%d')
+            subprocess.run(['git', 'commit', '-m', f'작업일지 자동 갱신 ({today})'],
+                           cwd=BASE_DIR, check=True, capture_output=True, text=True)
+            # 원격이 앞서 있을 수 있으니 rebase 후 push
+            subprocess.run(['git', 'pull', '--rebase', 'origin', 'main'],
+                           cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
+            push = subprocess.run(['git', 'push', 'origin', 'main'],
+                                  cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
+            if push.returncode == 0:
+                log('  ✅ push 완료 → 1~2분 뒤 폰 화면에 반영됩니다')
+            else:
+                log(f'  ⚠️ push 실패(로컬 커밋은 완료): {push.stderr.strip()[:200]}')
+    except Exception as e:
+        log(f'  ⚠️ 폰 반영 실패(건너뜀): {e}')
+
     # 완료 요약
     elapsed = (datetime.now(KST) - start_time).seconds
     log('')
