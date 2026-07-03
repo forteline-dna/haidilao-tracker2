@@ -10,3 +10,15 @@ lark_refresh_token.txt
 # 시공 PDF 원본은 공개 저장소에 올리지 않음 (용량·개인정보)
 일일작업일보/
 lark_app_secret.txt
+# 내부 문서/원본 데이터는 공개 저장소에 올리지 않음 (2026-07-03 비공개화)
+라크 대화내용/
+회의록/
+도면수정내용 /
+주간보고서/
+작업일지_데이터.json
+작업일지_데이터.backup_*.json
+lark_chat_events.json
+lark_messages_by_date.json
+reverse_links.json
+chat_events_js.txt
+chat_events_linked.txt
