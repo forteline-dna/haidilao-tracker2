@@ -421,6 +421,48 @@ def step_enrich():
         return False
 
 
+def _pages_deploy_status(sha):
+    """푸시한 커밋의 GitHub Pages deploy 체크 결과: 'success'/'failure'/'pending'/None(API 오류)"""
+    try:
+        req = Request(
+            f'https://api.github.com/repos/forteline-dna/haidilao-tracker2/commits/{sha}/check-runs',
+            headers={'Accept': 'application/vnd.github+json', 'User-Agent': 'morning-update'})
+        d = json.loads(urlopen(req, timeout=15).read().decode())
+        for r in d.get('check_runs', []):
+            if r.get('name') == 'deploy':
+                return r.get('conclusion') or 'pending'
+        return 'pending'
+    except Exception:
+        return None
+
+
+def _verify_pages_deploy(subprocess, max_retries=2):
+    """push 후 Pages 배포 결과 확인 — 실패하면 빈 커밋으로 자동 재배포 (GitHub 간헐 오류 대응)"""
+    for attempt in range(max_retries + 1):
+        sha = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=BASE_DIR,
+                             capture_output=True, text=True).stdout.strip()
+        status = None
+        for _ in range(12):                       # 최대 3분 대기 (15초 × 12)
+            time.sleep(15)
+            status = _pages_deploy_status(sha)
+            if status in ('success', 'failure'):
+                break
+        if status == 'success':
+            log('  ✅ Pages 배포 성공 확인')
+            return
+        if status != 'failure':                   # pending/None → 판단 보류 (보통 정상 배포됨)
+            log('  ℹ️ Pages 배포 상태 확인 불가 — 그대로 종료 (대부분 정상 배포됨)')
+            return
+        if attempt >= max_retries:
+            log(f'  ❌ Pages 배포 {max_retries + 1}회 연속 실패 — GitHub 상태 확인 필요')
+            return
+        log(f'  ⚠️ Pages 배포 실패 감지 → 빈 커밋으로 재배포 ({attempt + 1}/{max_retries}회차)')
+        subprocess.run(['git', 'commit', '--allow-empty', '-m', 'Pages 재배포 자동 재시도'],
+                       cwd=BASE_DIR, capture_output=True, text=True)
+        subprocess.run(['git', 'push', 'origin', 'main'],
+                       cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
+
+
 # ════════════════════════════════════════
 #  MAIN
 # ════════════════════════════════════════
@@ -529,6 +571,7 @@ def main():
                                   cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
             if push.returncode == 0:
                 log('  ✅ push 완료 → 1~2분 뒤 폰 화면에 반영됩니다')
+                _verify_pages_deploy(subprocess)
             else:
                 log(f'  ⚠️ push 실패(로컬 커밋은 완료): {push.stderr.strip()[:200]}')
     except Exception as e:
