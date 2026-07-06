@@ -30,6 +30,7 @@
   --cat-schedule: #a0365e;
   --cat-report: #c2410c;
   --cat-chat: #888888;
+  --cat-mail: #0891b2;
   --radius: 3px;
   --radius-sm: 2px;
   --shadow: 0 2px 8px rgba(0,0,0,0.06);
@@ -163,6 +164,7 @@ body {
 .pill[data-cat="schedule"].active { background: var(--cat-schedule); border-color: var(--cat-schedule); color: #fff; }
 .pill[data-cat="report"].active { background: var(--cat-report); border-color: var(--cat-report); color: #fff; }
 .pill[data-cat="chat"].active { background: var(--cat-chat); border-color: var(--cat-chat); color: #fff; }
+.pill[data-cat="mail"].active { background: var(--cat-mail); border-color: var(--cat-mail); color: #fff; }
 .toolbar-btns { display: flex; gap: 4px; margin-left: auto; }
 .tbtn {
   padding: 4px 10px;
@@ -408,6 +410,7 @@ body {
 .tl-strip[data-cat="schedule"]  { --cat-color: var(--cat-schedule); --cat-rgb: 160,54,94; }
 .tl-strip[data-cat="report"]    { --cat-color: var(--cat-report); --cat-rgb: 194,65,12; }
 .tl-strip[data-cat="chat"]      { --cat-color: var(--cat-chat); --cat-rgb: 136,136,136; }
+.tl-strip[data-cat="mail"]      { --cat-color: var(--cat-mail); --cat-rgb: 8,145,178; }
 
 .tl-empty {
   display: flex;
@@ -537,6 +540,7 @@ body {
 .evt-cat-dot[data-cat="schedule"]  { background: var(--cat-schedule); }
 .evt-cat-dot[data-cat="report"]    { background: var(--cat-report); }
 .evt-cat-dot[data-cat="chat"]      { background: var(--cat-chat); }
+.evt-cat-dot[data-cat="mail"]      { background: var(--cat-mail); }
 .evt-info { flex: 1; min-width: 0; }
 .evt-date { font-size: 10px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .evt-title-text {
@@ -1136,6 +1140,7 @@ body.resizing-panels { cursor: col-resize; user-select: none; }
       <span class="pill active" data-cat="drawing">📐 도면</span>
       <span class="pill active" data-cat="schedule">📅 일정</span>
       <span class="pill active" data-cat="report">📊 주간보고</span>
+      <span class="pill active" data-cat="mail">📧 이메일</span>
       <span class="pill" data-cat="chat">💬 라크</span>
     </div>
     <div class="toolbar-btns">
@@ -1213,6 +1218,7 @@ body.resizing-panels { cursor: col-resize; user-select: none; }
           <option value="meeting">📋 회의</option>
           <option value="drawing">📐 도면변경</option>
           <option value="schedule">📅 일정</option>
+          <option value="mail">📧 이메일</option>
           <option value="chat">💬 라크대화</option>
         </select>
       </div>
@@ -2041,7 +2047,7 @@ function exportExcel() {
   // 카테고리별 색상 (HTML --cat-* 와 동일)
   const CAT_HEX = {
     confirmed:'2D8A56', change:'B8860B', issue:'C0392B', cost:'6B3FA0',
-    meeting:'2C5AA0', drawing:'1A7A7A', schedule:'A0365E', report:'C2410C', chat:'888888'
+    meeting:'2C5AA0', drawing:'1A7A7A', schedule:'A0365E', report:'C2410C', chat:'888888', mail:'0891B2'
   };
   const HEADERS = ['ID','날짜','요일','카테고리','제목','요약','상세내용','주요결정','연결이벤트','출처'];
   const nCols = HEADERS.length;
