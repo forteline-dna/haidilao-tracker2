@@ -440,7 +440,7 @@ def _verify_pages_deploy(subprocess, max_retries=2):
     """push 후 Pages 배포 결과 확인 — 실패하면 빈 커밋으로 자동 재배포 (GitHub 간헐 오류 대응)"""
     for attempt in range(max_retries + 1):
         sha = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=BASE_DIR,
-                             capture_output=True, text=True).stdout.strip()
+                             capture_output=True, text=True, encoding='utf-8', errors='replace').stdout.strip()
         status = None
         for _ in range(12):                       # 최대 3분 대기 (15초 × 12)
             time.sleep(15)
@@ -458,9 +458,9 @@ def _verify_pages_deploy(subprocess, max_retries=2):
             return
         log(f'  ⚠️ Pages 배포 실패 감지 → 빈 커밋으로 재배포 ({attempt + 1}/{max_retries}회차)')
         subprocess.run(['git', 'commit', '--allow-empty', '-m', 'Pages 재배포 자동 재시도'],
-                       cwd=BASE_DIR, capture_output=True, text=True)
+                       cwd=BASE_DIR, capture_output=True, text=True, encoding='utf-8', errors='replace')
         subprocess.run(['git', 'push', 'origin', 'main'],
-                       cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
+                       cwd=BASE_DIR, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120)
 
 
 # ════════════════════════════════════════
@@ -554,7 +554,7 @@ def main():
     try:
         import subprocess
         subprocess.run(['git', 'add', '-A'], cwd=BASE_DIR, check=True,
-                       capture_output=True, text=True)
+                       capture_output=True, text=True, encoding='utf-8', errors='replace')
         # 스테이징된 변경이 있을 때만 커밋/푸시 (returncode 0 = 변경 없음)
         no_change = subprocess.run(['git', 'diff', '--cached', '--quiet'],
                                    cwd=BASE_DIR).returncode == 0
@@ -563,12 +563,12 @@ def main():
         else:
             today = datetime.now(KST).strftime('%Y-%m-%d')
             subprocess.run(['git', 'commit', '-m', f'작업일지 자동 갱신 ({today})'],
-                           cwd=BASE_DIR, check=True, capture_output=True, text=True)
+                           cwd=BASE_DIR, check=True, capture_output=True, text=True, encoding='utf-8', errors='replace')
             # 원격이 앞서 있을 수 있으니 rebase 후 push
             subprocess.run(['git', 'pull', '--rebase', 'origin', 'main'],
-                           cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
+                           cwd=BASE_DIR, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120)
             push = subprocess.run(['git', 'push', 'origin', 'main'],
-                                  cwd=BASE_DIR, capture_output=True, text=True, timeout=120)
+                                  cwd=BASE_DIR, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=120)
             if push.returncode == 0:
                 log('  ✅ push 완료 → 1~2분 뒤 폰 화면에 반영됩니다')
                 _verify_pages_deploy(subprocess)

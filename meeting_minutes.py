@@ -72,7 +72,23 @@ def download_file(token, message_id, file_key, save_path):
 
 
 def doc_to_text(path):
-    """macOS textutil 로 .doc/.docx → 평문 텍스트"""
+    """.doc/.docx → 평문 텍스트 (.docx는 zipfile 직접 추출 — 전 플랫폼, .doc는 macOS textutil)"""
+    if path.lower().endswith('.docx'):
+        try:
+            import zipfile
+            from xml.etree import ElementTree as ET
+            W = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+            with zipfile.ZipFile(path) as z:
+                root = ET.fromstring(z.read('word/document.xml'))
+            paras = []
+            for p in root.iter(f'{W}p'):
+                t = ''.join(el.text or '' for el in p.iter(f'{W}t'))
+                if t.strip():
+                    paras.append(t)
+            return unicodedata.normalize('NFC', '\n'.join(paras))
+        except Exception as e:
+            _log(f'  ⚠️ docx 추출 오류: {e}')
+            return ''
     try:
         out = subprocess.run(
             ['textutil', '-convert', 'txt', '-stdout', path],
