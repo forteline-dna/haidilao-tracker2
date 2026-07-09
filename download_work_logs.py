@@ -16,6 +16,11 @@ from datetime import datetime, timezone, timedelta
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 
+# 윈도우 콘솔(cp949)에서 이모지 출력 오류 방지 — stdout/stderr를 UTF-8로 강제
+for _stream in (sys.stdout, sys.stderr):
+    if _stream and hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8', errors='replace')
+
 # ── 설정 ──
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 SAVE_DIR   = os.path.join(BASE_DIR, '일일작업일보')
@@ -149,6 +154,17 @@ def download_file(token, message_id, file_key, save_path):
         return False
 
 
+def auto_refresh_token():
+    """daily_update.py의 refresh_token 자동 갱신 재사용 (브라우저 불필요)"""
+    sys.path.insert(0, BASE_DIR)
+    try:
+        from daily_update import refresh_via_refresh_token
+        return refresh_via_refresh_token()
+    except Exception as e:
+        log(f'    ⚠️ 자동 갱신 오류: {e}')
+        return None
+
+
 def load_work_logs():
     if not os.path.exists(DATA_FILE):
         log('❌ 작업일지_데이터.json 파일 없음')
@@ -182,7 +198,10 @@ def main():
         token = get_token()
 
     if not token:
-        log('❌ 토큰 없음! python3 download_work_logs.py --token')
+        log('토큰 없음 — refresh_token으로 자동 발급 시도...')
+        token = auto_refresh_token()
+    if not token:
+        log('❌ 토큰 없음! python download_work_logs.py --token')
         return
 
     # 저장 폴더 생성
@@ -206,6 +225,7 @@ def main():
     skipped    = 0
     failed     = 0
     token_expired = False
+    tried_refresh = False
 
     for i, log_entry in enumerate(logs):
         log_date   = log_entry.get('log_date', '')
@@ -231,6 +251,14 @@ def main():
 
         log(f'  [{i+1:02d}/{len(logs)}] ⬇️  {log_date} — {file_name[:50]}')
         result = download_file(token, message_id, file_key, save_path)
+
+        if result == 'token_expired' and not tried_refresh:
+            tried_refresh = True
+            log('    🔄 토큰 만료 — refresh_token으로 자동 갱신 시도...')
+            new_token = auto_refresh_token()
+            if new_token:
+                token = new_token
+                result = download_file(token, message_id, file_key, save_path)
 
         if result == 'token_expired':
             token_expired = True

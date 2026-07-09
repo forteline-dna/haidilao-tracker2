@@ -6,9 +6,10 @@
 - 작업일지 화면의 [🔄 지금 업데이트] 버튼 → POST /api/update → daily_update.py 실행
   (라크 채팅 수집 → 시공일지·이벤트 트래커·회의록 갱신)
 
-실행: 프로젝트 폴더의 "대시보드_시작.command" 더블클릭
-     (또는 터미널에서  python3 update_server.py )
-종료: 터미널 창에서 Control+C  또는 창 닫기
+실행: 프로젝트 폴더의 "대시보드_시작.bat" 더블클릭 (윈도우)
+     "대시보드_시작.command" 더블클릭 (맥)
+     (또는 터미널에서  python update_server.py )
+종료: 터미널 창에서 Ctrl+C  또는 창 닫기
 """
 import os
 import re
@@ -17,6 +18,11 @@ import json
 import subprocess
 import webbrowser
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+# 윈도우 콘솔(cp949)에서 이모지 출력 오류 방지 — stdout/stderr를 UTF-8로 강제
+for _stream in (sys.stdout, sys.stderr):
+    if _stream and hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8', errors='replace')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PORT = 8765
@@ -57,6 +63,8 @@ class Handler(SimpleHTTPRequestHandler):
             proc = subprocess.run(
                 [sys.executable, os.path.join(BASE_DIR, 'daily_update.py')],
                 cwd=BASE_DIR, capture_output=True, text=True, timeout=300,
+                encoding='utf-8', errors='replace',
+                env={**os.environ, 'PYTHONUTF8': '1'},
             )
             out = (proc.stdout or '') + '\n' + (proc.stderr or '')
 
@@ -72,7 +80,7 @@ class Handler(SimpleHTTPRequestHandler):
                 'tail': '\n'.join(out.strip().splitlines()[-15:]),
             }
             if proc.returncode != 0 and 'error' not in result:
-                result['error'] = '업데이트 스크립트 오류 (토큰 만료 가능 — 터미널에서 python3 daily_update.py --token)'
+                result['error'] = '업데이트 스크립트 오류 (토큰 만료 가능 — 터미널에서 python daily_update.py --token)'
             print(f'  ✔ 완료: 시공일지 +{result["work_logs"]}, 이벤트 +{result["events"]}, 회의록 +{result["meetings"]}')
         except subprocess.TimeoutExpired:
             result = {'ok': False, 'error': '시간 초과 (5분)'}
@@ -85,8 +93,14 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main():
     os.chdir(BASE_DIR)
-    httpd = ThreadingHTTPServer(('127.0.0.1', PORT), Handler)
     url = f'http://localhost:{PORT}{HOME_PAGE}'
+    try:
+        httpd = ThreadingHTTPServer(('127.0.0.1', PORT), Handler)
+    except OSError:
+        # 이미 서버가 켜져 있음 → 브라우저만 열고 종료
+        print('이미 대시보드 서버가 실행 중입니다. 브라우저를 엽니다.')
+        webbrowser.open(url)
+        return
     print('═' * 55)
     print('  📊 하이디라오 대시보드 서버 시작')
     print(f'  주소: {url}')

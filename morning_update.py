@@ -19,6 +19,11 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from collections import defaultdict
 
+# 윈도우 콘솔(cp949)에서 이모지 출력 오류 방지 — stdout/stderr를 UTF-8로 강제
+for _stream in (sys.stdout, sys.stderr):
+    if _stream and hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8', errors='replace')
+
 # ── 경로 설정 ──
 BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 SAVE_DIR  = os.path.join(BASE_DIR, '일일작업일보')

@@ -3,7 +3,12 @@
 하이디라오_작업일지.html 재생성 스크립트
 인원수 관리 기능 포함 (일별/주별/월별 집계)
 """
-import json, re, os
+import json, re, os, sys
+
+# 윈도우 콘솔(cp949)에서 이모지 출력 오류 방지 — stdout/stderr를 UTF-8로 강제
+for _stream in (sys.stdout, sys.stderr):
+    if _stream and hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8', errors='replace')
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, '작업일지_데이터.json')
@@ -1376,7 +1381,7 @@ async function runUpdate() {{
       btn.classList.remove('loading'); btn.innerHTML = orig;
     }}
   }} catch (e) {{
-    alert('수동 업데이트 버튼은 로컬 서버에서만 동작합니다.\\n\\n프로젝트 폴더의 "대시보드_시작.command" 파일을 더블클릭해 실행한 뒤,\\n자동으로 열리는 페이지에서 다시 눌러주세요.\\n\\n(또는 터미널에서:  python3 daily_update.py )');
+    alert('수동 업데이트 버튼은 로컬 서버가 켜져 있어야 동작합니다.\\n\\n바탕화면의 "작업일지" 바로가기(또는 프로젝트 폴더의 "대시보드_시작.bat")를 더블클릭해 실행한 뒤,\\n자동으로 열리는 페이지에서 다시 눌러주세요.\\n\\n(또는 터미널에서:  python daily_update.py )');
     btn.classList.remove('loading'); btn.innerHTML = orig;
   }}
 }}

@@ -21,6 +21,11 @@ from urllib.error import HTTPError
 from urllib.parse import urlencode
 from collections import defaultdict
 
+# 윈도우 콘솔(cp949)에서 이모지 출력 오류 방지 — stdout/stderr를 UTF-8로 강제
+for _stream in (sys.stdout, sys.stderr):
+    if _stream and hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8', errors='replace')
+
 # ── 설정 ──
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_ID = 'cli_a97aa70eeca15e15'

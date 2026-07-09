@@ -1864,6 +1864,16 @@ function setupResize() {
   const bottomPanel = document.getElementById('bottomPanel');
   let isResizing = false, startY, startTlH;
 
+  function applyTlHeight(h) {
+    tlSection.style.minHeight = h + 'px';
+    tlSection.style.maxHeight = h + 'px';
+    tlSection.style.flex = '0 0 ' + h + 'px';
+  }
+
+  // 저장된 높이 복원
+  const savedH = parseInt(localStorage.getItem('haidilao_tl_height'), 10);
+  if (savedH && !isNaN(savedH)) applyTlHeight(savedH);
+
   handle.addEventListener('mousedown', (e) => {
     isResizing = true;
     startY = e.clientY;
@@ -1874,15 +1884,15 @@ function setupResize() {
   document.addEventListener('mousemove', (e) => {
     if (!isResizing) return;
     const dy = e.clientY - startY;
-    const newH = Math.max(120, Math.min(window.innerHeight * 0.7, startTlH + dy));
-    tlSection.style.maxHeight = newH + 'px';
-    tlSection.style.flex = '0 0 ' + newH + 'px';
+    const newH = Math.max(120, Math.min(window.innerHeight * 0.8, startTlH + dy));
+    applyTlHeight(newH);
   });
   document.addEventListener('mouseup', () => {
     if (isResizing) {
       isResizing = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      localStorage.setItem('haidilao_tl_height', tlSection.offsetHeight);
     }
   });
 }
