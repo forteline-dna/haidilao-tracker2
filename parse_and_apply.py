@@ -80,6 +80,20 @@ TRADE_MAP = {
     '방수공':        '방수공',
     '배관공(수도공)': '수도공',
     '수도공':        '수도공',
+    # 한국어판 시공일지 (직종/인원 표) 라벨
+    '관리 인원':     '관리인원',
+    '통역':          '번역',
+    '현장 반장':     '현장반장',
+    '유지보수공':    '보양공',
+    '덕트(급기, 배기)': '풍관(신풍·배풍)',
+    '덕트(급기,배기)':  '풍관(신풍·배풍)',
+    '단열':          '단열공',
+    '습식 및 방수':  '방수공',
+    '습식및방수':    '방수공',
+    '설비공':        '수도공',
+    '냉난방공':      '냉난방공조공',
+    '공조칠러':      '공조칠러',
+    '칠러':          '공조칠러',
     '비계공':        '비계공',
     '경량철골공':    '경량철골공',
     '철거공':        '철거공',
@@ -116,7 +130,10 @@ WORK_KR = {
 }
 
 def translate_trade(cn):
-    return TRADE_MAP.get(cn, cn)
+    key = re.sub(r'\s+', ' ', cn.replace('\n', ' ')).strip()
+    if key in TRADE_MAP:
+        return TRADE_MAP[key]
+    return TRADE_MAP.get(key.replace(' ', ''), cn)
 
 def translate_work(cn):
     if cn in WORK_KR:
@@ -201,9 +218,9 @@ def parse_pdf(pdf_path):
     table_start_y = None
     table_end_y   = None
     for it in items:
-        if ('工种' in it['text'] or '공종' in it['text']) and it['x'] < 200:
+        if ('工种' in it['text'] or '공종' in it['text'] or '직종' in it['text']) and it['x'] < 200:
             table_start_y = it['y']
-        if any(lbl in it['text'] for lbl in ('今日施工人数总计', '施工人数总计', '금일 총 시공 인원')):
+        if any(lbl in it['text'] for lbl in ('今日施工人数总计', '施工人数总计', '금일 총 시공 인원', '금일 시공 인원 총계')):
             table_end_y = it['y']
             break
 
@@ -212,13 +229,13 @@ def parse_pdf(pdf_path):
         left_items = [
             it for it in items
             if (table_start_y - 5) < it['y'] < (table_end_y or 9999)
-            and it['text'] not in ('工종', '人数', '今日施工内容', '施工日志', '施工内容', '完成时间', '重要节点', '项目照片', '工种', '공종', '인원수', '오늘 시공 내용', '시공일지', '시공 내용', '완료 시간', '중요 일정', '프로젝트 사진')
+            and it['text'] not in ('工種', '人数', '今日施工内容', '施工日志', '施工内容', '完成时间', '重要节点', '项目照片', '工种', '공종', '인원수', '오늘 시공 내용', '시공일지', '시공 내용', '완료 시간', '중요 일정', '프로젝트 사진', '직종', '인원', '금일 시공 내용')
         ]
         
         rows = []
         for it in left_items:
             # 합계 행만 제외 (공종명에 '人员'이 포함될 수 있어 '人' 단독 필터는 쓰지 않음)
-            if any(kw in it['text'] for kw in ('总计', '總計', '합계', '人数总计', '총 시공')):
+            if any(kw in it['text'] for kw in ('总计', '總計', '합계', '人数总计', '총 시공', '총계')):
                 continue
             matched = False
             for r in rows:
@@ -249,7 +266,7 @@ def parse_pdf(pdf_path):
                             if re.match(r'^\d+$', p):
                                 count = int(p)
                     # 헤더 행 제외
-                    if trade_cn in ('工种', '人数', '공종', '인원수'):
+                    if trade_cn in ('工种', '人数', '공종', '인원수', '직종', '인원'):
                         trade_cn = ""
                 elif 130 <= it['x'] < 220:
                     # 구형(한글 번역본) PDF: 인원수가 별도 컬럼에 있음

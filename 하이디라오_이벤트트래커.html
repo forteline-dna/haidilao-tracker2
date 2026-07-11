@@ -237,8 +237,8 @@ body {
 /* ===== HORIZONTAL TIMELINE ===== */
 .timeline-section {
   flex: 1;
-  min-height: 560px;
-  max-height: 70vh;
+  min-height: 240px;
+  max-height: 43vh; /* 기본 분할: 타임라인 상단 ~60%, 목록/상세 하단 ~40% */
   position: relative;
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border);
@@ -1870,8 +1870,8 @@ function setupResize() {
     tlSection.style.flex = '0 0 ' + h + 'px';
   }
 
-  // 저장된 높이 복원
-  const savedH = parseInt(localStorage.getItem('haidilao_tl_height'), 10);
+  // 저장된 높이 복원 (v2: 기본 분할 변경으로 키 갱신 — 이전 저장값은 무시)
+  const savedH = parseInt(localStorage.getItem('haidilao_tl_height_v2'), 10);
   if (savedH && !isNaN(savedH)) applyTlHeight(savedH);
 
   handle.addEventListener('mousedown', (e) => {
@@ -1892,7 +1892,7 @@ function setupResize() {
       isResizing = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      localStorage.setItem('haidilao_tl_height', tlSection.offsetHeight);
+      localStorage.setItem('haidilao_tl_height_v2', tlSection.offsetHeight);
     }
   });
 }
