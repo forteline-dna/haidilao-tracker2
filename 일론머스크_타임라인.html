@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>일론 머스크 타임라인 — Elon Musk Timeline</title>
+<meta name="description" content="일론 머스크의 생애와 주요 사건을 연도별로 정리한 타임라인 (1971–2026)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #f7f7f8;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #f0f0f2;
+  --border: #e6e6ea;
+  --border-light: #d8d8de;
+  --text-primary: #16161a;
+  --text-secondary: #5c5c66;
+  --text-muted: #9a9aa4;
+  --line: #d5d5dc;
+  --shadow: 0 1px 3px rgba(0,0,0,0.05), 0 6px 20px rgba(0,0,0,0.04);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --font: 'Inter', 'Noto Sans KR', system-ui, sans-serif;
+
+  --c-early:   #6b7280;
+  --c-startup: #7c3aed;
+  --c-spacex:  #2563eb;
+  --c-tesla:   #dc2626;
+  --c-x:       #0f172a;
+  --c-ai:      #0891b2;
+  --c-politics:#c2410c;
+}
+[data-theme="dark"] {
+  --bg-primary: #0e0e11;
+  --bg-secondary: #17171b;
+  --bg-card: #1a1a20;
+  --bg-hover: #222229;
+  --border: #2a2a33;
+  --border-light: #34343f;
+  --text-primary: #f0f0f3;
+  --text-secondary: #a8a8b4;
+  --text-muted: #6a6a76;
+  --line: #2e2e38;
+  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 6px 20px rgba(0,0,0,0.25);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.35);
+
+  --c-early:   #9ca3af;
+  --c-startup: #a78bfa;
+  --c-spacex:  #60a5fa;
+  --c-tesla:   #f87171;
+  --c-x:       #cbd5e1;
+  --c-ai:      #22d3ee;
+  --c-politics:#fb923c;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+  transition: background 0.3s, color 0.3s;
+}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+/* ===== HERO ===== */
+.hero {
+  padding: 56px 24px 32px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(1200px 400px at 50% -120px, rgba(37,99,235,0.10), transparent 70%),
+    var(--bg-secondary);
+}
+.hero-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+}
+.hero-title {
+  font-size: clamp(30px, 6vw, 52px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.05;
+}
+.hero-sub {
+  margin-top: 12px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+.hero-stats {
+  margin-top: 26px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.stat {
+  min-width: 92px;
+  padding: 12px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.stat .num { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.stat .lbl { font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; margin-top: 2px; }
+
+/* ===== CONTROLS ===== */
+.controls {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 14px 24px;
+  background: color-mix(in srgb, var(--bg-primary) 82%, transparent);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+}
+.filter:hover { background: var(--bg-hover); color: var(--text-primary); }
+.filter.active { color: #fff; border-color: transparent; }
+.filter .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.filter.active .dot { background: rgba(255,255,255,0.9); }
+.filter[data-cat="all"].active   { background: var(--text-primary); color: var(--bg-secondary); }
+.filter[data-cat="early"].active   { background: var(--c-early); }
+.filter[data-cat="startup"].active { background: var(--c-startup); }
+.filter[data-cat="spacex"].active  { background: var(--c-spacex); }
+.filter[data-cat="tesla"].active   { background: var(--c-tesla); }
+.filter[data-cat="x"].active       { background: var(--c-x); }
+.filter[data-cat="ai"].active      { background: var(--c-ai); }
+.filter[data-cat="politics"].active{ background: var(--c-politics); }
+.theme-btn {
+  margin-left: 4px;
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* ===== TIMELINE ===== */
+.timeline {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+  position: relative;
+}
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 140px;
+  top: 40px;
+  bottom: 80px;
+  width: 2px;
+  background: linear-gradient(var(--line), var(--line));
+}
+.item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 116px 1fr;
+  gap: 28px;
+  padding: 12px 0;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.item.hidden { display: none; }
+.item .year {
+  text-align: right;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+  padding-top: 14px;
+}
+.item .year .date { display: block; font-size: 11px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.3px; margin-top: 2px; }
+.item::before {
+  content: "";
+  position: absolute;
+  left: 134px;
+  top: 22px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--cat-color);
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 0 0 1px var(--cat-color);
+  z-index: 2;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cat-color);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  box-shadow: var(--shadow);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+.card .tag {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--cat-color);
+  margin-bottom: 6px;
+}
+.card h3 { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.card p { margin-top: 6px; font-size: 13.5px; color: var(--text-secondary); }
+
+.footer {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px 60px;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.9;
+}
+.footer a { color: var(--text-secondary); }
+
+@media (max-width: 600px) {
+  .timeline::before { left: 8px; }
+  .item { grid-template-columns: 1fr; gap: 4px; padding-left: 30px; }
+  .item .year { text-align: left; padding-top: 0; font-size: 17px; }
+  .item .year .date { display: inline; margin-left: 8px; }
+  .item::before { left: 2px; top: 6px; }
+}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="hero-eyebrow">Biography · Timeline</div>
+  <h1 class="hero-title">일론 머스크 타임라인</h1>
+  <p class="hero-sub">Elon Reeve Musk — 1971년부터 2026년까지의 주요 여정</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="num">1971</div><div class="lbl">출생</div></div>
+    <div class="stat"><div class="num">55세</div><div class="lbl">2026 기준</div></div>
+    <div class="stat"><div class="num" id="stat-count">—</div><div class="lbl">주요 사건</div></div>
+    <div class="stat"><div class="num">$850B</div><div class="lbl">순자산 (2026)</div></div>
+  </div>
+</div>
+
+<div class="controls" id="controls">
+  <button class="filter active" data-cat="all"><span class="dot"></span>전체</button>
+  <button class="filter" data-cat="early"><span class="dot" style="color:var(--c-early)"></span>초기 생애</button>
+  <button class="filter" data-cat="startup"><span class="dot" style="color:var(--c-startup)"></span>초기 창업</button>
+  <button class="filter" data-cat="spacex"><span class="dot" style="color:var(--c-spacex)"></span>SpaceX</button>
+  <button class="filter" data-cat="tesla"><span class="dot" style="color:var(--c-tesla)"></span>Tesla</button>
+  <button class="filter" data-cat="x"><span class="dot" style="color:var(--c-x)"></span>X / Twitter</button>
+  <button class="filter" data-cat="ai"><span class="dot" style="color:var(--c-ai)"></span>AI · 기타</button>
+  <button class="filter" data-cat="politics"><span class="dot" style="color:var(--c-politics)"></span>정치 · DOGE</button>
+  <button class="theme-btn" id="themeBtn" title="테마 전환">🌙</button>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<div class="footer">
+  이 타임라인은 공개된 언론 보도와 백과사전 자료를 바탕으로 정리되었습니다. 일부 날짜·수치는 출처에 따라 다를 수 있습니다.<br>
+  주요 출처: Wikipedia · Britannica · Statista · Forbes · Reuters · 각종 언론 보도
+</div>
+
+<script>
+const EVENTS = [
+  { year:"1971", date:"6월 28일", cat:"early", tag:"출생", title:"남아프리카공화국 프리토리아 출생", desc:"본명 일론 리브 머스크(Elon Reeve Musk). 아버지 에롤, 어머니 메이 사이에서 태어났다." },
+  { year:"1983", date:"12세", cat:"early", tag:"어린 시절", title:"비디오게임 'Blastar' 제작·판매", desc:"직접 만든 게임을 컴퓨터 잡지에 500달러에 팔며 프로그래밍 재능을 처음 드러냈다." },
+  { year:"1989", date:"", cat:"early", tag:"이주", title:"캐나다로 이주", desc:"어머니의 국적을 통해 캐나다 시민권을 얻어 남아공을 떠났다." },
+  { year:"1992", date:"", cat:"early", tag:"학업", title:"펜실베이니아 대학교 편입", desc:"퀸스 대학교를 거쳐 유펜으로 편입, 경제학·물리학 학위를 취득했다." },
+  { year:"1995", date:"", cat:"startup", tag:"첫 창업", title:"스탠퍼드 중퇴 후 Zip2 창업", desc:"박사과정 입학 이틀 만에 중퇴하고 동생 킴발과 함께 온라인 도시 정보 서비스 Zip2를 세웠다." },
+  { year:"1999", date:"", cat:"startup", tag:"엑싯 · 창업", title:"Zip2 매각, X.com 설립", desc:"Zip2를 컴팩에 3억 700만 달러에 매각. 그 자금으로 온라인 금융 서비스 X.com을 창업했다." },
+  { year:"2000", date:"", cat:"startup", tag:"합병", title:"X.com + Confinity → PayPal", desc:"두 회사가 합병해 훗날 PayPal로 이름을 바꾸며 온라인 결제 시장을 개척했다." },
+  { year:"2002", date:"", cat:"startup", tag:"엑싯", title:"PayPal, eBay에 15억 달러 매각", desc:"이베이가 PayPal을 인수하며 머스크는 약 1억 8천만 달러를 손에 쥐었다." },
+  { year:"2002", date:"", cat:"spacex", tag:"창업", title:"SpaceX 설립", desc:"우주 운송 비용을 낮추고 인류의 화성 이주를 실현하겠다는 목표로 SpaceX를 세웠다." },
+  { year:"2004", date:"", cat:"tesla", tag:"투자", title:"테슬라 투자·이사회 의장 취임", desc:"초기 투자자로 참여해 이사회 의장이 되며 전기차 사업에 발을 들였다." },
+  { year:"2006", date:"", cat:"tesla", tag:"확장", title:"솔라시티 공동 설립", desc:"사촌들과 함께 태양광 회사 솔라시티를 세우고 의장을 맡았다. (2016년 테슬라가 인수)" },
+  { year:"2008", date:"9월", cat:"spacex", tag:"이정표", title:"팰컨 1, 궤도 진입 성공", desc:"민간 개발 액체연료 로켓 최초로 지구 궤도 도달. 이후 NASA와 ISS 화물 운송 계약을 따냈다." },
+  { year:"2008", date:"", cat:"tesla", tag:"경영", title:"테슬라 CEO 취임 · 로드스터 출시", desc:"금융위기 속에서 CEO를 맡아 첫 전기 스포츠카 로드스터를 시장에 내놓았다." },
+  { year:"2010", date:"6월", cat:"tesla", tag:"상장", title:"테슬라 나스닥 상장(IPO)", desc:"자동차 기업으로는 수십 년 만의 미국 상장에 성공했다." },
+  { year:"2012", date:"5월", cat:"spacex", tag:"이정표", title:"드래건, ISS 도킹 성공", desc:"민간 우주선 최초로 국제우주정거장에 화물을 실어 나르며 새 시대를 열었다." },
+  { year:"2015", date:"", cat:"ai", tag:"AI", title:"OpenAI 공동 설립", desc:"안전한 인공지능 개발을 목표로 비영리 연구소 OpenAI 설립에 참여했다. (2018년 이사회 사임)" },
+  { year:"2016", date:"", cat:"ai", tag:"창업", title:"뉴럴링크 · 더 보링 컴퍼니 설립", desc:"뇌-컴퓨터 인터페이스(뉴럴링크)와 지하 터널(보링 컴퍼니) 사업을 동시에 시작했다." },
+  { year:"2018", date:"2월", cat:"spacex", tag:"이정표", title:"팰컨 헤비 발사 · 로드스터 우주로", desc:"세계 최강급 로켓을 쏘아 올리며 자신의 테슬라 로드스터를 우주로 보냈다." },
+  { year:"2018", date:"", cat:"tesla", tag:"논란", title:"'상장폐지' 트윗 · SEC 합의", desc:"'자금 확보(funding secured)' 트윗으로 증권당국과 갈등, 합의 끝에 의장직에서 물러났다." },
+  { year:"2020", date:"5월", cat:"spacex", tag:"이정표", title:"크루 드래건 유인 우주비행 성공", desc:"민간 기업 최초로 우주비행사를 ISS로 실어 나르며 유인 우주 시대를 열었다." },
+  { year:"2020", date:"", cat:"tesla", tag:"급성장", title:"테슬라 주가 폭등 · S&P 500 편입", desc:"모델 3 대량생산 안착과 함께 주가가 치솟아 세계 최고 부자 반열에 올랐다." },
+  { year:"2021", date:"", cat:"tesla", tag:"기록", title:"세계 최고 부자 등극 · 타임 올해의 인물", desc:"테슬라 시가총액 1조 달러 돌파와 함께 세계 최고 부호가 되었다." },
+  { year:"2022", date:"10월", cat:"x", tag:"인수", title:"트위터 440억 달러에 인수", desc:"수개월의 법적 공방 끝에 트위터를 인수하고 대규모 구조조정을 단행했다." },
+  { year:"2023", date:"4월", cat:"spacex", tag:"이정표", title:"스타십 첫 통합 비행 시험", desc:"인류 역사상 가장 크고 강력한 로켓 스타십의 첫 궤도급 시험 발사를 진행했다." },
+  { year:"2023", date:"7월", cat:"ai", tag:"AI", title:"xAI 설립", desc:"OpenAI에 맞서 자체 인공지능 기업 xAI를 세우고 챗봇 'Grok' 개발에 나섰다." },
+  { year:"2023", date:"7월", cat:"x", tag:"리브랜딩", title:"트위터 → 'X'로 개명", desc:"파랑새 로고를 버리고 오랜 꿈이던 'X' 브랜드로 서비스를 재탄생시켰다." },
+  { year:"2024", date:"1월", cat:"ai", tag:"이정표", title:"뉴럴링크 첫 인간 이식", desc:"뇌에 칩을 이식한 첫 임상 환자가 생각만으로 컴퓨터 커서를 움직였다." },
+  { year:"2024", date:"", cat:"politics", tag:"정치", title:"트럼프 지지 · 대선 개입", desc:"미국 대선에서 트럼프 후보를 공개 지지하며 막대한 자금과 영향력을 투입했다." },
+  { year:"2025", date:"5월", cat:"politics", tag:"정부", title:"정부효율부(DOGE) 주도 후 사퇴", desc:"트럼프 행정부의 정부효율부를 이끌며 예산 삭감을 추진했으나 이견 끝에 물러났다." },
+  { year:"2026", date:"2월", cat:"ai", tag:"합병", title:"SpaceX, xAI 인수 — 1.25조 달러 규모", desc:"SpaceX가 xAI를 전량 주식 교환으로 흡수, 로켓·스타링크·Grok·X를 한 지붕 아래 묶었다." },
+  { year:"2026", date:"", cat:"tesla", tag:"기록", title:"순자산 8,500억 달러 돌파", desc:"인류 최초로 8천억 달러 벽을 넘어선 세계 최고 부호 자리를 굳혔다." },
+  { year:"2026", date:"5월", cat:"spacex", tag:"상장", title:"SpaceX IPO 신청", desc:"약 1.75조 달러 기업가치가 거론되는 초대형 상장 절차에 착수했다." },
+];
+
+const CATCOLOR = {
+  early:"var(--c-early)", startup:"var(--c-startup)", spacex:"var(--c-spacex)",
+  tesla:"var(--c-tesla)", x:"var(--c-x)", ai:"var(--c-ai)", politics:"var(--c-politics)"
+};
+
+const tl = document.getElementById('timeline');
+EVENTS.forEach(e => {
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.dataset.cat = e.cat;
+  div.style.setProperty('--cat-color', CATCOLOR_get(e.cat));
+  div.innerHTML = `
+    <div class="year">${e.year}${e.date ? `<span class="date">${e.date}</span>` : ''}</div>
+    <div class="card">
+      <span class="tag">${e.tag}</span>
+      <h3>${e.title}</h3>
+      <p>${e.desc}</p>
+    </div>`;
+  tl.appendChild(div);
+});
+function CATCOLOR_get(c){ return CATCOLOR[c] || 'var(--text-muted)'; }
+
+document.getElementById('stat-count').textContent = EVENTS.length;
+
+// Filters
+document.getElementById('controls').addEventListener('click', ev => {
+  const btn = ev.target.closest('.filter');
+  if (!btn) return;
+  document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cat = btn.dataset.cat;
+  document.querySelectorAll('.item').forEach(it => {
+    it.classList.toggle('hidden', cat !== 'all' && it.dataset.cat !== cat);
+  });
+});
+
+// Theme toggle
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  themeBtn.textContent = dark ? '🌙' : '☀️';
+});
+</script>
+</body>
+</html>
