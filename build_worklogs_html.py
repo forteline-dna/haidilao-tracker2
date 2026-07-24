@@ -749,7 +749,7 @@ function renderStats() {{
     WORK_LOGS.logs.some(l => (parseInt(getWorkers(l.log_date)[t]) || 0) > 0)));
   const avgWorkers = workedDays > 0 ? Math.round(totalWorkers / workedDays) : 0;
 
-  const endDate = new Date('2026-08-16');
+  const endDate = new Date('2026-08-30');
   const today = new Date(); today.setHours(0,0,0,0);
   const daysLeft = Math.ceil((endDate - today) / (1000*60*60*24));
   const dDayText = daysLeft > 0 ? `D-${{daysLeft}}` : daysLeft === 0 ? 'D-Day' : `D+${{Math.abs(daysLeft)}}`;
@@ -761,7 +761,7 @@ function renderStats() {{
     {{ val: workedDays + '일', label:'인원 입력일', color:'#f59e0b' }},
     {{ val: avgWorkers + '명', label:'일 평균 인원', color:'#a855f7' }},
     {{ val: allTrades.size, label:'공종 수', color:'#06b6d4' }},
-    {{ val: dDayText, label:'준공까지 (8/16)', color: dDayColor }},
+    {{ val: dDayText, label:'준공까지 (8/30)', color: dDayColor }},
   ];
   document.getElementById('statsRow').innerHTML = stats.map(s => `
     <div class="stat-card">
