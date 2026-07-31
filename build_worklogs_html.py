@@ -23,6 +23,15 @@ data = translate_data_for_html(data, BASE_DIR)
 
 data_json = json.dumps(data, ensure_ascii=False)
 
+# ── 잔여 공정표 (없으면 섹션 미표시) ──
+SCHEDULE_FILE = os.path.join(BASE_DIR, '공정표_데이터.json')
+try:
+    with open(SCHEDULE_FILE, 'r', encoding='utf-8') as f:
+        schedule_data = json.load(f)
+except Exception:
+    schedule_data = {'rev': '', 'revised': '', 'tasks': []}
+schedule_json = json.dumps(schedule_data, ensure_ascii=False)
+
 HTML = f"""<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -492,6 +501,18 @@ body {{
 
 /* ── CAT GRID ── */
 .cat-grid {{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:0; margin-bottom:48px; border:1px solid var(--border); }}
+.gantt-wrap {{ border:1px solid var(--border); margin-bottom:48px; overflow-x:auto; }}
+.gantt-head {{ display:flex; font-size:0.66rem; color:var(--text-muted); border-bottom:1px solid var(--border); background:var(--bg-alt,#fafafa); }}
+.gantt-row {{ display:flex; border-bottom:1px solid var(--border); align-items:stretch; min-width:640px; }}
+.gantt-row:last-child {{ border-bottom:none; }}
+.gantt-label {{ flex:0 0 220px; padding:7px 10px; font-size:0.72rem; border-right:1px solid var(--border); }}
+.gantt-label .gz {{ color:var(--text-muted); font-size:0.64rem; display:block; }}
+.gantt-track {{ flex:1; position:relative; min-width:400px; }}
+.gantt-bar {{ position:absolute; top:50%; transform:translateY(-50%); height:12px; border-radius:6px; background:#3b82f6; opacity:0.85; }}
+.gantt-bar.done {{ background:#9ca3af; }}
+.gantt-bar.now {{ background:#f59e0b; }}
+.gantt-today {{ position:absolute; top:0; bottom:0; width:2px; background:#ef4444; opacity:0.6; }}
+.gantt-dates {{ flex:0 0 118px; padding:7px 8px; font-size:0.64rem; color:var(--text-muted); text-align:right; border-left:1px solid var(--border); white-space:nowrap; }}
 .cat-chip {{
   background:var(--bg-card); border:none;
   border-right:1px solid var(--border); border-bottom:1px solid var(--border);
@@ -538,6 +559,12 @@ body {{
 
   <div class="section-title"><span class="icon">🏗️</span> 공종별 시공 현황</div>
   <div class="cat-grid" id="catGrid"></div>
+
+  <!-- ── 잔여 공정표 ── -->
+  <div id="scheduleWrap" style="display:none">
+    <div class="section-title" style="margin-top:32px"><span class="icon">📐</span> 잔여 공정표 <span id="schedRev" style="font-weight:400;font-size:0.72rem;color:var(--text-muted)"></span></div>
+    <div class="gantt-wrap" id="ganttWrap"></div>
+  </div>
 
   <!-- ── 인원 집계 탭 ── -->
   <div class="section-title"><span class="icon">👷</span> 인원 집계</div>
@@ -595,6 +622,7 @@ body {{
 <script>
 // ===== DATA =====
 const WORK_LOGS = {data_json};
+const SCHEDULE = {schedule_json};
 
 // ===== 작업일지 없는 날 (사유 표기) =====
 const NO_LOG_DAYS = {{
@@ -738,6 +766,39 @@ function init() {{
   renderMonthly();
   renderCalendar();
   renderMissing();
+  renderSchedule();
+}}
+
+// ===== 잔여 공정표 =====
+function renderSchedule() {{
+  const tasks = (SCHEDULE.tasks || []).filter(t => t.end >= '2026-07-01');
+  if (!tasks.length) return;
+  document.getElementById('scheduleWrap').style.display = '';
+  document.getElementById('schedRev').textContent = `${{SCHEDULE.rev}} · ${{SCHEDULE.revised}} 개정 · 7월 이후 ${{tasks.length}}건`;
+  const koName = s => {{
+    const toks = String(s).split(/[\\/>]/).filter(t => /[가-힣]/.test(t));
+    const base = toks.length ? toks.join(' ') : String(s);
+    const words = base.split(/[\\s,，]+/).filter(w => /[가-힣0-9]/.test(w) && !/^[\\u4e00-\\u9fff&，。()]+$/.test(w));
+    return (words.length ? words.join(' ') : base).replace(/\\s+/g, ' ').trim();
+  }};
+  const min = new Date('2026-07-01'), max = new Date('2026-08-31T23:59:59');
+  const span = max - min;
+  const today = new Date();
+  const pos = d => Math.max(0, Math.min(100, (new Date(d) - min) / span * 100));
+  tasks.sort((a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end));
+  let html = '<div class="gantt-row gantt-head"><div class="gantt-label">작업</div><div class="gantt-track" style="display:flex;align-items:center">';
+  ['7월', '8월'].forEach((m, i) => {{ html += `<span style="flex:1;padding:4px 6px;border-left:${{i ? '1px solid var(--border)' : 'none'}}">${{m}}</span>`; }});
+  html += '</div><div class="gantt-dates">기간</div></div>';
+  tasks.forEach(t => {{
+    const l = pos(t.start), r = pos(t.end + 'T23:59:59');
+    const cls = new Date(t.end + 'T23:59:59') < today ? 'done' : (new Date(t.start) <= today ? 'now' : '');
+    const fmt = d => `${{+d.slice(5, 7)}}/${{+d.slice(8, 10)}}`;
+    html += `<div class="gantt-row"><div class="gantt-label">${{koName(t.work) || koName(t.zone)}}<span class="gz">${{koName(t.zone)}}</span></div>` +
+      `<div class="gantt-track"><div class="gantt-today" style="left:${{pos(today.toISOString().slice(0, 10))}}%"></div>` +
+      `<div class="gantt-bar ${{cls}}" style="left:${{l}}%;width:${{Math.max(r - l, 1.2)}}%"></div></div>` +
+      `<div class="gantt-dates">${{fmt(t.start)}} ~ ${{fmt(t.end)}}</div></div>`;
+  }});
+  document.getElementById('ganttWrap').innerHTML = html;
 }}
 
 // ===== STATS =====
