@@ -1817,6 +1817,17 @@ C. 현장개설 전 제출 서류 (시공계획서, 조직도, 공정표, 보험
     linkedEvents: ["EVT-012", "EVT-016", "EVT-017", "EVT-024", "EVT-026"],
     source: "Lark 시공그룹 채팅"
   }
+,
+
+  {
+    id: "EVT-120", date: "2026-08-26", category: "chat",
+    title: "라크 시공 그룹 대화 — 2026-08-26 (21건)",
+    summary: "21건 대화 — 这些货架地脚尽快更换@_user_1 @_user_2 | This message was recalled | @_user_1 这个文件帮忙看下",
+    details: `시공 그룹 채팅 (21건):\n\n[10:36] 这些货架地脚尽快更换@_user_1 @_user_2\n[13:18] This message was recalled\n[13:19] @_user_1 这个文件帮忙看下\n[13:20] @_user_1 @_user_2\n[13:21] 这是啥东西\n[13:22] 这是那个设备的网线吧  不是我安排的\n[13:24] 里面是这些东西\n[13:24] @_user_1\n[15:25] 总包领导们，千万注意开关，电源插座，网线插座位置@_user_1 @_user_2 @_user_3\n[15:26] 现在能换过来吗\n[15:26] @_user_1 先改\n[15:26] 你找下负责人\n[17:03] 这些石材台面按错了，高柜台面是单边，矮柜台面是双边，尽快整改，总包领导们@_user_1 @_user_2 @_user_3\n[17:35] @_user_1 通知一下\n[17:35] 抽屉打不开呢\n... 외 6건`,
+    decisions: [],
+    linkedEvents: [],
+    source: "Lark 시공그룹 채팅"
+  }
 ];
 
 // ===== CATEGORY CONFIG =====
